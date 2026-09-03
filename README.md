@@ -38,8 +38,8 @@ If you are running a windows machine, command line code is available for cloning
 Windows Command Prompt, Windows Git Bash, or Linux Terminal
 (Download Git Bash for Windows - https://git-scm.com/install/windows)
 ```
-git clone https://github.com/NextGenRF-Design-Inc/AI_Assisted_Bytepipe_App.git
-cd AI_Assisted_Bytepipe_App
+git clone https://github.com/NextGenRF-Design-Inc/KuiperLinuxBytepipe.git
+cd KuiperLinuxBytepipe
 ```
 2) Setup workspace
 Windows Command Prompt, Windows Git Bash, or Linux Terminal
