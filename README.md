@@ -95,11 +95,11 @@ cd $MY_APP_DIR/workspace
    
 Copy the one that matches your bytepipe model and rename the copy to "fsbl.elf".
 ```
-cp -f zynqmp_fsbl_3cg.elf ./fsbl.elf
+cp -f ../prebuilt/zynqmp_fsbl_3cg.elf ./fsbl.elf
 ```
 -or-
 ```
-cp -f zynqmp_fsbl_3eg.elf ./fsbl.elf
+cp -f ../prebuilt/zynqmp_fsbl_3eg.elf ./fsbl.elf
 ```
 3) Run [build_zynqmp_boot_bin_external_fsbl.sh](sw/build_zynqmp_boot_bin_external_fsbl.sh). build_zynqmp_boot_bin_external_fsbl.sh is a modified boot.bin build script that uses the fsbl.elf in the same directory as the boot.bin build script. The original is found [here](https://raw.githubusercontent.com/analogdevicesinc/wiki-scripts/main/zynqmp_boot_bin/build_zynqmp_boot_bin.sh).
    
