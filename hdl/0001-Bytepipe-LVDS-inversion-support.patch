@@ -1,0 +1,137 @@
+From b9fa4215b4a5382de8e8425f9bcdab560645b1f5 Mon Sep 17 00:00:00 2001
+From: Brent Kowal <brent.kowal@analog.com>
+Date: Wed, 19 Mar 2025 11:42:34 -0400
+Subject: [PATCH] Bytepipe LVDS inversion support
+
+Added support in the ADI library to invert
+the signals sourced from LVDS lines to
+compensate for routing on the PCB. Currently
+the inversions for each channel are hardcoded
+in axi_adrv9001_if.v
+---
+ library/axi_adrv9001/adrv9001_rx.v     | 19 ++++++++++---------
+ library/axi_adrv9001/adrv9001_tx.v     | 19 ++++++++++---------
+ library/axi_adrv9001/axi_adrv9001_if.v | 12 ++++++++----
+ 3 files changed, 28 insertions(+), 22 deletions(-)
+
+diff --git a/library/axi_adrv9001/adrv9001_rx.v b/library/axi_adrv9001/adrv9001_rx.v
+index 2705e8d5d..56cc8c2bb 100644
+--- a/library/axi_adrv9001/adrv9001_rx.v
++++ b/library/axi_adrv9001/adrv9001_rx.v
+@@ -43,7 +43,8 @@ module adrv9001_rx #(
+   parameter IODELAY_ENABLE = 1,
+   parameter IODELAY_CTRL = 0,
+   parameter USE_BUFG = 0,
+-  parameter IO_DELAY_GROUP = "dev_if_delay_group"
++  parameter IO_DELAY_GROUP = "dev_if_delay_group",
++  parameter LVDS_INVERT_MASK = 'h00
+ ) (
+ 
+   // device interface
+@@ -148,14 +149,14 @@ module adrv9001_rx #(
+       .IB (rx_dclk_in_n_NC),
+       .O (clk_in_s));
+ 
+-    assign {adc_data_strobe[0],adc_data_1[0],adc_data_0[0]} = data_s0;
+-    assign {adc_data_strobe[1],adc_data_1[1],adc_data_0[1]} = data_s1;
+-    assign {adc_data_strobe[2],adc_data_1[2],adc_data_0[2]} = data_s2;
+-    assign {adc_data_strobe[3],adc_data_1[3],adc_data_0[3]} = data_s3;
+-    assign {adc_data_strobe[4],adc_data_1[4],adc_data_0[4]} = data_s4;
+-    assign {adc_data_strobe[5],adc_data_1[5],adc_data_0[5]} = data_s5;
+-    assign {adc_data_strobe[6],adc_data_1[6],adc_data_0[6]} = data_s6;
+-    assign {adc_data_strobe[7],adc_data_1[7],adc_data_0[7]} = data_s7;
++    assign {adc_data_strobe[0],adc_data_1[0],adc_data_0[0]} = data_s0 ^ LVDS_INVERT_MASK;
++    assign {adc_data_strobe[1],adc_data_1[1],adc_data_0[1]} = data_s1 ^ LVDS_INVERT_MASK;
++    assign {adc_data_strobe[2],adc_data_1[2],adc_data_0[2]} = data_s2 ^ LVDS_INVERT_MASK;
++    assign {adc_data_strobe[3],adc_data_1[3],adc_data_0[3]} = data_s3 ^ LVDS_INVERT_MASK;
++    assign {adc_data_strobe[4],adc_data_1[4],adc_data_0[4]} = data_s4 ^ LVDS_INVERT_MASK;
++    assign {adc_data_strobe[5],adc_data_1[5],adc_data_0[5]} = data_s5 ^ LVDS_INVERT_MASK;
++    assign {adc_data_strobe[6],adc_data_1[6],adc_data_0[6]} = data_s6 ^ LVDS_INVERT_MASK;
++    assign {adc_data_strobe[7],adc_data_1[7],adc_data_0[7]} = data_s7 ^ LVDS_INVERT_MASK;
+ 
+     assign serdes_in_p = {rx_strobe_in_p_strobe_in,
+                           rx_qdata_in_p_qdata3,
+diff --git a/library/axi_adrv9001/adrv9001_tx.v b/library/axi_adrv9001/adrv9001_tx.v
+index 88a3194ec..619cb011a 100644
+--- a/library/axi_adrv9001/adrv9001_tx.v
++++ b/library/axi_adrv9001/adrv9001_tx.v
+@@ -40,7 +40,8 @@ module adrv9001_tx #(
+   parameter NUM_LANES = 4,
+   parameter FPGA_TECHNOLOGY = 0,
+   parameter USE_BUFG = 0,
+-  parameter USE_RX_CLK_FOR_TX = 0
++  parameter USE_RX_CLK_FOR_TX = 0,
++  parameter LVDS_INVERT_MASK = 'h00
+ ) (
+   input                   ref_clk,
+   input                   up_clk,
+@@ -129,14 +130,14 @@ module adrv9001_tx #(
+       .IB (tx_dclk_in_n_NC),
+       .O (tx_dclk_in_s));
+ 
+-    assign data_s0 = {dac_data_clk[7],dac_data_strb[7],dac_data_1[7],dac_data_0[7]};
+-    assign data_s1 = {dac_data_clk[6],dac_data_strb[6],dac_data_1[6],dac_data_0[6]};
+-    assign data_s2 = {dac_data_clk[5],dac_data_strb[5],dac_data_1[5],dac_data_0[5]};
+-    assign data_s3 = {dac_data_clk[4],dac_data_strb[4],dac_data_1[4],dac_data_0[4]};
+-    assign data_s4 = {dac_data_clk[3],dac_data_strb[3],dac_data_1[3],dac_data_0[3]};
+-    assign data_s5 = {dac_data_clk[2],dac_data_strb[2],dac_data_1[2],dac_data_0[2]};
+-    assign data_s6 = {dac_data_clk[1],dac_data_strb[1],dac_data_1[1],dac_data_0[1]};
+-    assign data_s7 = {dac_data_clk[0],dac_data_strb[0],dac_data_1[0],dac_data_0[0]};
++    assign data_s0 = {dac_data_clk[7],dac_data_strb[7],dac_data_1[7],dac_data_0[7]} ^ LVDS_INVERT_MASK;
++    assign data_s1 = {dac_data_clk[6],dac_data_strb[6],dac_data_1[6],dac_data_0[6]} ^ LVDS_INVERT_MASK;
++    assign data_s2 = {dac_data_clk[5],dac_data_strb[5],dac_data_1[5],dac_data_0[5]} ^ LVDS_INVERT_MASK;
++    assign data_s3 = {dac_data_clk[4],dac_data_strb[4],dac_data_1[4],dac_data_0[4]} ^ LVDS_INVERT_MASK;
++    assign data_s4 = {dac_data_clk[3],dac_data_strb[3],dac_data_1[3],dac_data_0[3]} ^ LVDS_INVERT_MASK;
++    assign data_s5 = {dac_data_clk[2],dac_data_strb[2],dac_data_1[2],dac_data_0[2]} ^ LVDS_INVERT_MASK;
++    assign data_s6 = {dac_data_clk[1],dac_data_strb[1],dac_data_1[1],dac_data_0[1]} ^ LVDS_INVERT_MASK;
++    assign data_s7 = {dac_data_clk[0],dac_data_strb[0],dac_data_1[0],dac_data_0[0]} ^ LVDS_INVERT_MASK;
+ 
+     assign {tx_dclk_out_p_dclk_out,
+             tx_strobe_out_p_strobe_out,
+diff --git a/library/axi_adrv9001/axi_adrv9001_if.v b/library/axi_adrv9001/axi_adrv9001_if.v
+index 23fc591ec..9f0782f92 100644
+--- a/library/axi_adrv9001/axi_adrv9001_if.v
++++ b/library/axi_adrv9001/axi_adrv9001_if.v
+@@ -213,7 +213,8 @@ module axi_adrv9001_if #(
+     .IODELAY_CTRL (IODELAY_CTRL),
+     .IODELAY_ENABLE (IODELAY_ENABLE),
+     .USE_BUFG (RX_USE_BUFG),
+-    .IO_DELAY_GROUP ({IO_DELAY_GROUP,"_rx"})
++    .IO_DELAY_GROUP ({IO_DELAY_GROUP,"_rx"}),
++    .LVDS_INVERT_MASK('h00) //No inversion on RX 1
+   ) i_rx_1_phy (
+     .rx_dclk_in_n_NC (rx1_dclk_in_n_NC),
+     .rx_dclk_in_p_dclk_in (rx1_dclk_in_p_dclk_in),
+@@ -279,7 +280,8 @@ module axi_adrv9001_if #(
+       .IODELAY_CTRL (0),
+       .IODELAY_ENABLE (IODELAY_ENABLE),
+       .USE_BUFG (RX_USE_BUFG),
+-      .IO_DELAY_GROUP ({IO_DELAY_GROUP,"_rx"})
++      .IO_DELAY_GROUP ({IO_DELAY_GROUP,"_rx"}),
++      .LVDS_INVERT_MASK('b111) //RX2 Invert strobe, I and Q
+     ) i_rx_2_phy (
+       .rx_dclk_in_n_NC (rx2_dclk_in_n_NC),
+       .rx_dclk_in_p_dclk_in (rx2_dclk_in_p_dclk_in),
+@@ -348,7 +350,8 @@ module axi_adrv9001_if #(
+     .NUM_LANES (TX_NUM_LANES),
+     .FPGA_TECHNOLOGY (FPGA_TECHNOLOGY),
+     .USE_BUFG (TX_USE_BUFG),
+-    .USE_RX_CLK_FOR_TX (USE_RX_CLK_FOR_TX)
++    .USE_RX_CLK_FOR_TX (USE_RX_CLK_FOR_TX),
++    .LVDS_INVERT_MASK ('b0101) //TX1 Invert Strobe and I
+   ) i_tx_1_phy (
+     .ref_clk (ref_clk),
+     .up_clk (up_clk),
+@@ -414,7 +417,8 @@ module axi_adrv9001_if #(
+       .NUM_LANES (TX_NUM_LANES),
+       .FPGA_TECHNOLOGY (FPGA_TECHNOLOGY),
+       .USE_BUFG (TX_USE_BUFG),
+-      .USE_RX_CLK_FOR_TX (USE_RX_CLK_FOR_TX)
++      .USE_RX_CLK_FOR_TX (USE_RX_CLK_FOR_TX),
++      .LVDS_INVERT_MASK ('h00) //No inversion on TX 2
+     ) i_tx_2_phy (
+       .ref_clk (ref_clk),
+       .up_clk (up_clk),
+-- 
+2.45.1
+

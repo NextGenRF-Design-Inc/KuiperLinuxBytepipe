@@ -1,0 +1,5 @@
+setenv bootargs console=ttyPS0,115200 root=/dev/mmcblk0p2 earlycon rootfstype=ext4 rootwait clk_ignore_unused cpuidle.off=1 systemd.unit=multi-user.target drm.debug=0 log_buf_len=8M
+fatload mmc 0:1 ${kernel_addr_r} Image
+fatload mmc 0:1 ${fdt_addr_r} system.dtb
+booti ${kernel_addr_r} - ${fdt_addr_r}
+

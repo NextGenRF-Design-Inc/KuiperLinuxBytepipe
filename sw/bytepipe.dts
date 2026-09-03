@@ -1,0 +1,646 @@
+/dts-v1/;
+
+#include "zynqmp.dtsi"
+#include "zynqmp-clk-ccf.dtsi"
+#include <dt-bindings/input/input.h>
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/pinctrl/pinctrl-zynqmp.h>
+#include <dt-bindings/phy/phy.h>
+#include <dt-bindings/interrupt-controller/irq.h>
+#include <dt-bindings/clock/versaclock.h>
+
+/ {
+	model = "BytePipe Rev2";
+	compatible = "xlnx,zynqmp";
+
+	aliases {
+		ethernet0 = &gem3;
+		gpio0 = &gpio;
+		i2c0 = &i2c0;
+		i2c1 = &i2c1;
+		mmc0 = &sdhci1;
+		mmc1 = &sdhci0;
+		rtc0 = &rtc;
+		serial0 = &uart0;
+		serial1 = &uart1;
+		serial2 = &dcc;
+		usb0 = &usb0;
+	};
+
+	chosen {
+		bootargs = "root=/dev/mmcblk0p2 rw rootwait earlycon";
+		stdout-path = "serial0:115200n8";
+	};
+
+	memory@0 {
+		device_type = "memory";
+		reg = <0x0 0x0 0x0 0x7ff00000>;
+	};
+
+	leds {
+		compatible = "gpio-leds";
+		heartbeat-led {
+			label = "heartbeat";
+			gpios = <&gpio 7 GPIO_ACTIVE_HIGH>;
+			linux,default-trigger = "heartbeat";
+		};
+	};
+	
+
+	
+	
+	
+    
+};
+
+
+
+&can1 {
+	status = "okay";
+};
+
+&dcc {
+	status = "okay";
+};
+
+&fpd_dma_chan1 {
+	status = "okay";
+};
+
+&fpd_dma_chan2 {
+	status = "okay";
+};
+
+&fpd_dma_chan3 {
+	status = "okay";
+};
+
+&fpd_dma_chan4 {
+	status = "okay";
+};
+
+&fpd_dma_chan5 {
+	status = "okay";
+};
+
+&fpd_dma_chan6 {
+	status = "okay";
+};
+
+&fpd_dma_chan7 {
+	status = "okay";
+};
+
+&fpd_dma_chan8 {
+	status = "okay";
+};
+
+&gem3 {
+	status = "okay";
+	phy-handle = <&phy0>;
+	phy-mode = "rgmii-id";
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_gem3_default>;
+	phy0: ethernet-phy@9 {
+		reg = <9>;
+		ti,rx-internal-delay = <0x8>;
+		ti,tx-internal-delay = <0xa>;
+		ti,fifo-depth = <0x1>;
+		ti,dp83867-rxctrl-strap-quirk;
+		/* reset-gpios = <&tca6416_u97 6 GPIO_ACTIVE_LOW>; */
+	};
+};
+
+&gpio {
+	status = "okay";
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_gpio_default>;
+};
+
+&i2c1 {
+    status = "okay";
+    clock-frequency = <400000>;
+                
+	macid: eeprom2@51 { /* IIC_MAC_ID - SOM - U7 */
+	     compatible = "at,24mac402";
+	     reg = <0x51>;
+	};
+	
+	idt5901: clock-generator@6a { /* IDT 5P49V5935 clock generator - HDK - U6 */
+    #clock-cells = <1>;
+    status = "okay";
+    compatible = "idt,5p49v5935";
+    reg = <0x6a>;
+
+
+		 
+		//GTR_CLK3 (DP), GTRCLK 2 (DP), GTRCLK 0 (USB), GTRCLK1 (SATA)
+		OUT1 {
+		  idt,mode = <VC5_LVDS>;
+		};
+		OUT2 {
+		  idt,mode = <VC5_LVDS>;
+		};
+	    OUT3 {
+		  idt,mode = <VC5_LVDS>;
+		};
+		OUT4 {
+		  idt,mode = <VC5_LVDS>;
+		};		 		 		 
+	};
+
+};
+
+&pinctrl0 {
+	status = "okay";
+
+	pinctrl_uart0_default: uart0-default {
+		mux {
+			groups = "uart0_2_grp";
+			function = "uart0";
+		};
+
+		conf {
+			groups = "uart0_2_grp";
+			slew-rate = <SLEW_RATE_SLOW>;
+			power-source = <IO_STANDARD_LVCMOS18>;
+		};
+
+		conf-rx {
+			pins = "MIO10";
+			bias-high-impedance;
+		};
+
+		conf-tx {
+			pins = "MIO11";
+			bias-disable;
+		};
+	};
+
+	pinctrl_uart1_default: uart1-default {
+		mux {
+			groups = "uart1_2_grp";
+			function = "uart1";
+		};
+
+		conf {
+			groups = "uart1_2_grp";
+			slew-rate = <SLEW_RATE_SLOW>;
+			power-source = <IO_STANDARD_LVCMOS18>;
+		};
+
+		conf-rx {
+			pins = "MIO9";
+			bias-high-impedance;
+		};
+
+		conf-tx {
+			pins = "MIO8";
+			bias-disable;
+		};
+	};
+
+	pinctrl_usb0_default: usb0-default {
+		mux {
+			groups = "usb0_0_grp";
+			function = "usb0";
+		};
+
+		conf {
+			groups = "usb0_0_grp";
+			power-source = <IO_STANDARD_LVCMOS18>;
+			io-standard = <IO_STANDARD_LVCMOS18>;
+		};
+
+		conf-rx {
+			pins = "MIO52", "MIO53", "MIO55";
+			bias-high-impedance;
+			drive-strength = <12>;
+			slew-rate = <SLEW_RATE_FAST>;
+		};
+
+		conf-tx {
+			pins = "MIO54", "MIO56", "MIO57", "MIO58", "MIO59",
+			       "MIO60", "MIO61", "MIO62", "MIO63";
+			bias-disable;
+			drive-strength = <4>;
+			slew-rate = <SLEW_RATE_SLOW>;
+		};
+	};
+
+	pinctrl_gem3_default: gem3-default {
+		mux {
+			function = "ethernet3";
+			groups = "ethernet3_0_grp";
+		};
+
+		conf {
+			groups = "ethernet3_0_grp";
+			slew-rate = <SLEW_RATE_SLOW>;
+			power-source = <IO_STANDARD_LVCMOS18>;
+		};
+
+		conf-rx {
+			pins = "MIO70", "MIO71", "MIO72", "MIO73", "MIO74",
+									"MIO75";
+			bias-high-impedance;
+			low-power-disable;
+		};
+
+		conf-tx {
+			pins = "MIO64", "MIO65", "MIO66", "MIO67", "MIO68",
+									"MIO69";
+			bias-disable;
+			low-power-enable;
+		};
+
+		mux-mdio {
+			function = "mdio3";
+			groups = "mdio3_0_grp";
+		};
+
+		conf-mdio {
+			groups = "mdio3_0_grp";
+			slew-rate = <SLEW_RATE_SLOW>;
+			power-source = <IO_STANDARD_LVCMOS18>;
+			bias-disable;
+		};
+	};
+
+
+	pinctrl_sdhci1_default: sdhci1-default {
+		mux {
+			groups = "sdio1_1_grp";
+			function = "sdio1";
+		};
+
+		conf {
+			groups = "sdio1_1_grp";
+			slew-rate = <SLEW_RATE_SLOW>;
+			power-source = <IO_STANDARD_LVCMOS33>;
+			bias-disable;
+		};
+
+		mux-cd {
+			groups = "sdio1_cd_0_grp";
+			function = "sdio1_cd";
+		};
+
+		conf-cd {
+			groups = "sdio1_cd_0_grp";
+			bias-high-impedance;
+			bias-pull-up;
+			slew-rate = <SLEW_RATE_SLOW>;
+			power-source = <IO_STANDARD_LVCMOS33>;
+		};
+
+	};
+
+	pinctrl_sdhci0_default: sdhci0-default {
+        mux {
+            groups = "sdio0_0_grp";
+            function = "sdio0";
+        };
+        conf {
+            groups = "sdio0_0_grp";
+            bias-disable;
+            slew-rate = <SLEW_RATE_SLOW>;
+            power-source = <IO_STANDARD_LVCMOS18>;
+        };
+    };
+
+	pinctrl_gpio_default: gpio-default {
+		mux-sw {
+			function = "gpio0";
+			groups = "gpio0_7_grp";
+		};
+
+		conf-sw {
+			groups = "gpio0_7_grp";
+			slew-rate = <SLEW_RATE_SLOW>;
+			power-source = <IO_STANDARD_LVCMOS18>;
+		};
+	};
+};
+
+/* emmc */
+&sdhci0 {
+    status = "okay";
+    bus-width = <8>;
+    non-removable;
+	disable-wp;
+	no-sd;
+    no-sdio;
+	cap-mmc-highspeed;
+    mmc-hs200-1_8v;
+	pinctrl-names = "default";
+    pinctrl-0 = <&pinctrl_sdhci0_default>;
+};
+
+/* SD1 with level shifter */
+&sdhci1 {
+	status = "okay";
+	/*
+	 * 1.0 revision has level shifter and this property should be
+	 * removed for supporting UHS mode
+	 */
+	no-1-8-v;
+	disable-wp;
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_sdhci1_default>;
+	xlnx,mio-bank = <1>;
+	max-frequency = <50000000>;
+};
+
+&uart0 {
+	status = "okay";
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_uart0_default>;
+};
+
+&uart1 {
+	status = "okay";
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_uart1_default>;
+};
+
+
+
+
+&psgtr {
+	status = "okay";
+
+	clocks = <&idt5901 3>,
+		 <&idt5901 4>,
+		 <&idt5901 2>,
+		 <&idt5901 1>;
+
+	clock-names = "ref0", "ref1", "ref2", "ref3";
+
+	/*
+	 * Apply output rates as dependencies of the PS-GTR consumer.
+	 * This occurs before the PS-GTR driver probes.
+	 */
+	assigned-clocks = <&idt5901 3>,
+			  <&idt5901 4>,
+			  <&idt5901 2>,
+			  <&idt5901 1>;
+
+	assigned-clock-rates = <52000000>,
+			       <125000000>,
+			       <27000000>,
+			       <27000000>;
+};
+
+&sata {
+	status = "okay";
+	phy-names = "sata-phy";
+	phys = <&psgtr 1 PHY_TYPE_SATA 0 1>;
+};
+
+/* ULPI SMSC USB3320 */
+&usb0 {
+	status = "okay";
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_usb0_default>;
+	phy-names = "usb3-phy";
+	phys = <&psgtr 0 PHY_TYPE_USB3 0 0>;
+	
+};
+
+&dwc3_0 {
+    status = "okay";
+    dr_mode = "peripheral";
+    maximum-speed = "super-speed";
+    snps,usb3_lpm_capable;
+    phy-names = "usb3-phy";
+    phys = <&psgtr 0 PHY_TYPE_USB3 0 0>;
+};
+
+&watchdog0 {
+	status = "okay";
+};
+
+&xilinx_ams {
+	status = "okay";
+};
+
+&ams_ps {
+	status = "okay";
+};
+
+&ams_pl {
+	status = "okay";
+};
+
+&zynqmp_dpdma {
+	status = "okay";
+};
+
+&zynqmp_dpsub {
+	status = "okay";
+
+	/*
+	 * These two phys entries are board-specific.
+	 * Keep lanes 3/2 only if BytePipe routes DisplayPort TX to PS-GTR lanes 3/2.
+	 * The final cell is the PS-GTR refclk index; keep 3/2 only if those lanes
+	 * really use refclk3/refclk2 on this board.
+	 */
+	phy-names = "dp-phy0", "dp-phy1";
+	phys = <&psgtr 3 PHY_TYPE_DP 0 3>, <&psgtr 2 PHY_TYPE_DP 1 2>;
+
+
+};
+
+
+
+
+/ {
+	fpga_axi  {
+		interrupt-parent = <&gic>;
+		compatible = "simple-bus";
+		#address-cells = <0x1>;
+		#size-cells = <0x1>;
+		ranges = <0 0 0 0xffffffff>;
+
+		rx1_dma: dma@84A30000 {
+			compatible = "adi,axi-dmac-1.00.a";
+			reg = <0x84A30000 0x10000>;
+			#dma-cells = <1>;
+			interrupts = <0 109 IRQ_TYPE_LEVEL_HIGH>;
+			clocks = <&zynqmp_clk 71>;
+
+			adi,channels {
+				#size-cells = <0>;
+				#address-cells = <1>;
+
+				dma-channel@0 {
+					reg = <0>;
+					adi,source-bus-width = <64>;
+					adi,source-bus-type = <2>;
+					adi,destination-bus-width = <64>;
+					adi,destination-bus-type = <0>;
+				};
+			};
+		};
+
+		rx2_dma: dma@84A40000 {
+			compatible = "adi,axi-dmac-1.00.a";
+			reg = <0x84A40000 0x10000>;
+			#dma-cells = <1>;
+			interrupts = <0 108 IRQ_TYPE_LEVEL_HIGH>;
+			clocks = <&zynqmp_clk 71>;
+
+			adi,channels {
+				#size-cells = <0>;
+				#address-cells	 = <1>;
+
+				dma-channel@0 {
+					reg = <0>;
+					adi,source-bus-width = <64>;
+					adi,source-bus-type = <2>;
+					adi,destination-bus-width = <64>;
+					adi,destination-bus-type = <0>;
+				};
+			};
+		};
+
+		tx1_dma: dma@84A50000 {
+			compatible = "adi,axi-dmac-1.00.a";
+			reg = <0x84A50000 0x10000>;
+			#dma-cells = <1>;
+			interrupts = <0 107 IRQ_TYPE_LEVEL_HIGH>;
+			clocks = <&zynqmp_clk 71>;
+
+			adi,channels {
+				#size-cells = <0>;
+				#address-cells = <1>;
+
+				dma-channel@0 {
+					reg = <0>;
+					adi,source-bus-width = <64>;
+					adi,source-bus-type = <0>;
+					adi,destination-bus-width = <64>;
+					adi,destination-bus-type = <2>;
+				};
+			};
+		};
+
+		tx2_dma: dma@84A60000 {
+			compatible = "adi,axi-dmac-1.00.a";
+			reg = <0x84A60000 0x10000>;
+			#dma-cells = <1>;
+			interrupts = <0 106 IRQ_TYPE_LEVEL_HIGH>;
+			clocks = <&zynqmp_clk 71>;
+
+			adi,channels {
+				#size-cells = <0>;
+				#address-cells = <1>;
+
+				dma-channel@0 {
+					reg = <0>;
+					adi,source-bus-width = <64>;
+					adi,source-bus-type = <0>;
+					adi,destination-bus-width = <64>;
+					adi,destination-bus-type = <2>;
+				};
+			};
+		};
+
+		axi_adrv9002_core_rx1: axi-adrv9002-rx-lpc@84A00000 {
+			compatible = "adi,axi-adrv9002-rx-1.0";
+			reg = <0x84A00000 0x6000>;
+			clocks = <&adc0_adrv9002 0>;
+			dmas = <&rx1_dma 0>;
+			dma-names = "rx";
+			spibus-connected = <&adc0_adrv9002>;
+		};
+
+		axi_adrv9002_core_tx1: axi-adrv9002-tx-lpc@84A04000 {
+			compatible = "adi,axi-adrv9002-tx-1.0";
+			reg = <0x84A04000 0x2000>;
+			clocks = <&adc0_adrv9002 1>;
+			clock-names = "sampl_clk";
+			dmas = <&tx1_dma 0>;
+			dma-names = "tx";
+			adi,axi-dds-default-scale = <0x800>;
+			adi,axi-dds-default-frequency = <2000000>;
+		};
+
+		axi_adrv9002_core_tdd1: axi-adrv9002-core-tdd1-lpc@84A0C800 {
+			compatible = "adi,axi-tdd-1.00";
+			reg = <0x84A0C800 0x400>;
+			clocks = <&zynqmp_clk 71>, <&adc0_adrv9002 2>;
+			clock-names = "s_axi_aclk", "intf_clk";
+		};
+
+		axi_adrv9002_core_rx2: axi-adrv9002-rx2-lpc@84A09000 {
+			compatible = "adi,axi-adrv9002-rx2-1.0";
+			reg = <0x84A09000 0x1000>;
+			clocks = <&adc0_adrv9002 3>;
+			clock-names = "sampl_clk";
+			dmas = <&rx2_dma 0>;
+			dma-names = "rx";
+		};
+
+		axi_adrv9002_core_tx2: axi-adrv9002-tx2-lpc@84A0C000 {
+			compatible = "adi,axi-adrv9002-tx-1.0";
+			reg = <0x84A0C000 0x2000>;
+			clocks = <&adc0_adrv9002 4>;
+			clock-names = "sampl_clk";
+			dmas = <&tx2_dma 0>;
+			dma-names = "tx";
+			adi,axi-dds-default-scale = <0x800>;
+			adi,axi-dds-default-frequency = <2000000>;
+		};
+
+		axi_adrv9002_core_tdd2: axi-adrv9002-core-tdd2-lpc@84A0CC00 {
+			compatible = "adi,axi-tdd-1.00";
+			reg = <0x84A0CC00 0x400>;
+			clocks = <&zynqmp_clk 71>, <&adc0_adrv9002 5>;
+			clock-names = "s_axi_aclk", "intf_clk";
+		};
+
+		axi_sysid_0: axi-sysid-0@85000000 {
+			compatible = "adi,axi-sysid-1.00.a";
+			reg = <0x85000000 0x10000>;
+		};
+
+    };
+};
+
+&spi0 {
+	status = "okay";
+};
+
+#define fmc_spi spi0
+
+#include "adi-adrv9002.dtsi"
+
+/*
+Name		HDL	Linux
+output_enable	52	130
+tx2_enable	51	129i
+tx1_enable	50	128
+rx2_enable	49	127
+rx1_enable	48	126
+reset_trx	46	124
+gp_int		44	122
+dgpio_11	43	121
+dgpio_10	42	120
+dgpio_9		41	119
+dgpio_8		40	118
+dgpio_7		39	117
+dgpio_6		38	116
+dgpio_5		37	115
+dgpio_4		36	114
+dgpio_3		35	113
+dgpio_2		34	112
+dgpio_1		33	111
+dgpio_0		32	110
+*/
+
+&adc0_adrv9002 {
+	reset-gpios = <&gpio 124 GPIO_ACTIVE_LOW>;
+};
+

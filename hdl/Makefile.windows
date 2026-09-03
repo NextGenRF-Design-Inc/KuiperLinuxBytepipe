@@ -1,0 +1,77 @@
+# Windows 11 / cmd.exe version of the project Makefile.
+#
+# Prerequisites:
+#   - Vivado 2023.2 environment loaded (XILINX_VIVADO must be set)
+#   - GNU Make available as make or mingw32-make
+#   - Git available on PATH
+#
+# Examples:
+#   make -f Makefile.windows DEVICE=xczu3cg MODE=lvds
+#   mingw32-make -f Makefile.windows DEVICE=xczu3eg MODE=lvds
+
+SHELL := cmd.exe
+.SHELLFLAGS := /S /C
+
+wrkDir := $(CURDIR)
+srcDir := $(patsubst %/,%,$(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
+hdlDir := $(wrkDir)/Adi/hdl
+
+# settings64.bat normally defines XILINX_VIVADO, for example:
+# C:\Xilinx\Vivado\2023.2
+vivadoDir := $(subst \,/,$(XILINX_VIVADO))
+
+DEVICE ?= xczu3cg
+PART_SUFFIX ?= sbva484-1-e
+DEV := $(DEVICE)-$(PART_SUFFIX)
+MODE ?= lvds
+XSA_NAME ?= system_top.xsa
+
+SUPPORTED_DEVICES := xczu3cg xczu3eg xczu2cg xczu2eg
+
+ifeq ($(filter $(DEVICE),$(SUPPORTED_DEVICES)),)
+$(error Unsupported DEVICE '$(DEVICE)'. Choose one of: $(SUPPORTED_DEVICES))
+endif
+
+ifeq ($(strip $(XILINX_VIVADO)),)
+$(error XILINX_VIVADO is not set. First run C:\Xilinx\Vivado\2023.2\settings64.bat)
+endif
+
+.PHONY: all directories boards ip build adi_hdl help
+
+all: directories adi_hdl ip build
+
+help:
+	@echo Usage: make -f Makefile.windows DEVICE=xczu3cg MODE=lvds XSA_NAME=system_top.xsa
+	@echo Supported DEVICE values: $(SUPPORTED_DEVICES)
+	@echo Full Vivado part: DEVICE-PART_SUFFIX; default is $(DEV)
+	@echo Exported XSA: $(XSA_NAME)
+
+directories:
+	@echo Source Directory: $(srcDir)
+	@echo Build Directory: $(wrkDir)
+	@echo Vivado Directory: $(vivadoDir)
+	@echo Vivado Part: $(DEV)
+
+# This target may require an Administrator command prompt because it writes
+# inside the Vivado installation directory.
+boards:
+	@if not exist "$(vivadoDir)/data/boards/board_files" mkdir "$(vivadoDir)/data/boards/board_files"
+	@xcopy /E /I /Y "$(srcDir)/../../boards/bytepipe_3cg_som" "$(vivadoDir)/data/boards/board_files/bytepipe_3cg_som"
+
+ip:
+	@$(MAKE) -C "$(hdlDir)/library/util_pack/util_upack2" xilinx || exit /B 1
+	@$(MAKE) -C "$(hdlDir)/library/util_pack/util_cpack2" xilinx || exit /B 1
+	@$(MAKE) -C "$(hdlDir)/library/sysid_rom" xilinx || exit /B 1
+	@$(MAKE) -C "$(hdlDir)/library/axi_sysid" xilinx || exit /B 1
+	@$(MAKE) -C "$(hdlDir)/library/axi_dmac" xilinx || exit /B 1
+	@$(MAKE) -C "$(hdlDir)/library/axi_adrv9001" xilinx || exit /B 1
+
+build:
+	@vivado -mode batch -nojournal -source "$(srcDir)/make.tcl" -tclargs "$(MODE)" "$(DEV)" "$(XSA_NAME)"
+
+adi_hdl: | $(hdlDir)
+
+$(hdlDir):
+	@if not exist "$(wrkDir)/Adi" mkdir "$(wrkDir)/Adi"
+	@git clone --branch hdl_2023_r2 https://github.com/analogdevicesinc/hdl.git "$(hdlDir)" || exit /B 1
+	@git -C "$(hdlDir)" am "$(srcDir)/0001-Bytepipe-LVDS-inversion-support.patch" || exit /B 1
