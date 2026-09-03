@@ -108,6 +108,7 @@ cp -f ../prebuilt/zynqmp_fsbl_3eg.elf ./fsbl.elf
 **u-boot.elf compile instructions are [here](#compile-u-bootelf) and prebuilt instructions are [here](#use-prebuilt-u-bootelf)**
 
 ```
+chmod +x ../sw/build_zynqmp_boot_bin_external_fsbl.sh
 ./../sw/build_zynqmp_boot_bin_external_fsbl.sh system_top.xsa u-boot.elf download
 ```
 **Note: The download option pulls the bl31.elf (ARM Trusted Firmware runtime binary compiled for Exception Level 3) from the web.**
