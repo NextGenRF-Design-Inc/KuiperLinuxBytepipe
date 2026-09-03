@@ -1,8 +1,6 @@
 # KuiperLinux
 Tutorial for running Kuiper Linux on the Bytepipe
 
-# AI Assisted Bytepipe Application Creation
-
 ### What is this?
 This README a guide that illustrates how set up a Kuiper Linux SD card that works with the Bytepipe.
   - **Quick Start:** follow the tutorial and use prebuilt files as directed.
