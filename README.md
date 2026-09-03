@@ -55,7 +55,13 @@ Kuiper Linux is provided by Analog Devices.
 1) Download Kuiper Image from https://wiki.analog.com/resources/tools-software/linux-software/adi-kuiper_images/release_notes
 ![Kuiper_Download](kuiper_download_click.png)
 2) Flash Kuiper Image to SD card. Use Kuiper Imager tool if possible.
-3) Copy Zynqmp Common Image file to root (or top-level) of sd card's BOOT partition.
+3) Copy our modified ADI Linux Kernel to the root (or top-level) of sd card's BOOT partition.
+```
+export BOOT_PATH=<path to BOOT partition of your SD card post flash>
+cd $BOOT_PATH
+cp -f ../prebuilt/Image $BOOT_PATH/Image
+```
+- If you want to start with a default ADI Linux Kernel Image, copy the zynqmp common Image file to root (or top-level) of sd card's BOOT partition.
 ```
 export BOOT_PATH=<path to BOOT partition of your SD card post flash>
 cd $BOOT_PATH
