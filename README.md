@@ -66,8 +66,13 @@ At this point, your Kuiper sd card only missing **BOOT.BIN** and **system.dtb**.
 Both of which can be aquired from this repo's [prebuilt](prebuilt/) directory or built from scratch.
 BOOT.BIN is Bytepipe model specific, but system.dtb is not.
 
-If you decided to use prebuilt files, go to the [Use Prebuilt BOOT.BIN](#2a-use-prebuilt-bootbin) section of this document. 
-Otherwise, continue to [Compile BOOT.BIN](#2b-compile-bootbin)
+For a prebuilt BOOT.BIN, click on [Use Prebuilt BOOT.BIN](#2a-use-prebuilt-bootbin). 
+
+To compile a BOOT.BIN,continue to the "Compile BOOT.BIN" section or click on [Compile BOOT.BIN](#2b-compile-bootbin).
+
+For a prebuilt system.dtb, click on [Use Prebuilt system.dtb](#use-prebuilt-systemdtb).
+
+To compile system.dtb, click on [Compile system.dtb](#compile-systemdtb).
 
 ### 2a. Use Prebuilt BOOT.BIN
 1) Copy prebuilt BOOT.BIN to sd card
