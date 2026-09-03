@@ -26,7 +26,7 @@ In addition, GNU-radio is pre-installed to further facilitate embedded developme
     - Build device tree
     - Finalize Kuiper enabled sd card for booting on Bytepipe
 
-### Attention: Run Linux or Windows with a VM for everything other than building HDL
+### Attention: Run Linux natively or on a Virtual Machine for everything other than building HDL
 Building system.dtb, u-boot.elf, and BOOT.BIN is much simpler when running a linux OS on your build machine, so most of the steps in this guide will only be accompanied by linux bash command line code. 
 
 If you are running a windows machine, command line code is available for cloning this repo and building hdl in Vivado. After performing those two tasks, I reccomend you use a virtual machine to run Ubuntu v20.04 or v22.04. 
