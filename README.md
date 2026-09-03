@@ -87,7 +87,8 @@ cp -f  prebuilt/BOOT_3EG.BIN $BOOT_PATH/BOOT.BIN
 
 1) Move to workspace directory
 ```
-cd ../workspace
+export MY_APP_DIR=<project folder path>
+cd $MY_APP_DIR/workspace
 ```
 2) FSBL files zynqmp_fsbl_3cg.elf and zynqmp_fsbl_3eg.elf are included in this repo's sw directory.
 
