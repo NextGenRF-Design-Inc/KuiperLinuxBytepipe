@@ -4,6 +4,8 @@ Prepare a Kuiper Linux SD card for Bytepipe 3CG or 3EG, using prebuilt files or 
 
 Use Linux for SD-card preparation and software builds. HDL builds also support Windows. Source builds use Vivado/Vitis **2023.2**, ADI Linux **2023_r2_p1**, and Xilinx U-Boot **xilinx-v2023.2**.
 
+> **Prebuilt scripts:** `use-prebuilt-*.sh` scripts copy ready-made files from `prebuilt/`: BOOT.BIN and the device tree go to the SD card’s BOOT partition; XSA and U-Boot go to `workspace/` for BOOT.BIN assembly. They select the requested model where applicable and overwrite the destination file. No compilation is required.
+
 ## Setup
 
 ```bash
