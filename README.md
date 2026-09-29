@@ -129,13 +129,10 @@ Next, install **BOOT.BIN** and **system.dtb**, then complete [Finalize the SD ca
 Both can be acquired from this repo's [prebuilt](prebuilt/) directory or built from scratch.
 BOOT.BIN, FSBL, and XSA must all match your Bytepipe model (3CG or 3EG). This repository supplies one shared system.dtb; its hardware layout must still match your board and HDL.
 
-For a prebuilt BOOT.BIN, click on [Use Prebuilt BOOT.BIN](#2a-use-prebuilt-bootbin).
-
-To compile a BOOT.BIN, continue to the "Compile BOOT.BIN" section or click on [Compile BOOT.BIN](#2b-compile-bootbin).
-
-For a prebuilt system.dtb, click on [Use Prebuilt system.dtb](#use-prebuilt-systemdtb).
-
-To compile system.dtb, click on [Compile system.dtb](#compile-systemdtb).
+| Boot file | Use prebuilt | Build from source |
+|---|---|---|
+| `BOOT.BIN` | [Use prebuilt →](#2a-use-prebuilt-bootbin) | [Compile →](#2b-compile-bootbin) |
+| `system.dtb` | [Use prebuilt →](#use-prebuilt-systemdtb) | [Compile →](#compile-systemdtb) |
 
 ### 2a. Use Prebuilt BOOT.BIN
 
