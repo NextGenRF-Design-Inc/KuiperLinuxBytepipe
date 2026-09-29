@@ -42,6 +42,8 @@ cd KuiperLinuxBytepipe
 
 Script: [setup-workspace.sh](sw/setup-workspace.sh) — `bash sw/setup-workspace.sh` after cloning.
 
+**Run the script or the manual workspace setup commands below, not both.** The script creates the workspace after cloning; set the shell variables below if you will use manual commands in later sections.
+
 Linux Terminal or Windows Git Bash (run from the repository directory):
 ```bash
 export MY_APP_DIR="$(pwd -P)"
@@ -65,7 +67,7 @@ mkdir -p "$MY_APP_DIR/workspace"
 
 SD-card and workspace artifact copies use absolute paths anchored to these variables. Build sections explicitly select their working directory; run the steps within each section in order.
 
-The linked scripts are alternatives to the manual commands in each section. They locate the repository from their own location, so they do not require `MY_APP_DIR` and can be invoked by absolute path from any directory. SD-card scripts accept `BOOT_PATH` as an argument or exported variable and require it to be a writable mount point. Run scripts with Bash on Linux (workspace setup also works in Git Bash); only the HDL build has a Windows Command Prompt script. Each script supports `--help`.
+Running a linked script performs the command sequence for its section, using the selected model or option. **Run either the script or the manual commands below it; you do not need to run both.** Complete the stated prerequisites first. Exceptions such as manual image flashing are noted beside the script link. They locate the repository from their own location, so they do not require `MY_APP_DIR` and can be invoked by absolute path from any directory. SD-card scripts accept `BOOT_PATH` as an argument or exported variable and require it to be a writable mount point. Run scripts with Bash on Linux (workspace setup also works in Git Bash); only the HDL build has a Windows Command Prompt script. Each script supports `--help`.
 
 The build scripts do not install packages automatically. Run the dependency section first. The Linux and U-Boot scripts create fresh source checkouts and stop if those directories already exist, preserving existing work. For a retry, use the manual commands in the existing checkout or move it aside. The HDL Makefile requires a repository path without spaces.
 
@@ -78,6 +80,8 @@ Kuiper Linux is provided by Analog Devices and supports multiple evaluation plat
 
 Script: [install-build-deps.sh](sw/install-build-deps.sh).
 
+**Running this script runs the complete command sequence in this section for the selected option.** Complete any stated prerequisites first, then run either the script or the manual commands below, not both.
+
 Required for source builds on Ubuntu/Debian; prebuilt file copies do not need these packages. This script runs `sudo apt update` and installs the compiler, build tools, and libraries used below. Vivado/Vitis must be installed separately.
 
 ```bash
@@ -87,6 +91,8 @@ bash "$MY_APP_DIR/sw/install-build-deps.sh"
 ### 1. Flash generic Kuiper Image to sd card
 
 Script: [install-kernel.sh](sw/install-kernel.sh) — `bash sw/install-kernel.sh prebuilt "$BOOT_PATH"`. This script performs the kernel copy after flashing; download and flashing remain manual. Use `stock` to select the image already on the card.
+
+**Running this script runs the kernel-copy commands in this section for the selected option.** Download and flash the image first; then run either the script or the manual copy command, not both.
 
 1) Download the 2023_r2 Patch1 Kuiper image from https://wiki.analog.com/resources/tools-software/linux-software/adi-kuiper_images/release_notes
 ![Kuiper_Download](kuiper_download_click.png)
@@ -118,6 +124,8 @@ To compile system.dtb, click on [Compile system.dtb](#compile-systemdtb).
 
 Script: [use-prebuilt-boot-bin.sh](sw/use-prebuilt-boot-bin.sh) — `bash sw/use-prebuilt-boot-bin.sh 3CG "$BOOT_PATH"`. Use `3EG` for that model.
 
+**Running this script runs the complete command sequence in this section for the selected option.** Complete any stated prerequisites first, then run either the script or the manual commands below, not both.
+
 1) Copy prebuilt BOOT.BIN to sd card
 ```
 cp -f "$MY_APP_DIR/prebuilt/BOOT_3CG.BIN" "$BOOT_PATH/BOOT.BIN"
@@ -130,6 +138,8 @@ cp -f "$MY_APP_DIR/prebuilt/BOOT_3EG.BIN" "$BOOT_PATH/BOOT.BIN"
 ### 2b. Compile BOOT.BIN
 
 Script: [compile-boot-bin.sh](sw/compile-boot-bin.sh) — `bash sw/compile-boot-bin.sh 3CG "$BOOT_PATH"`. Set `XILINX_ROOT` first. Use `3EG` for that model; prepare the matching XSA and U-Boot first.
+
+**Running this script runs the complete command sequence in this section for the selected option.** Complete any stated prerequisites first, then run either the script or the manual commands below, not both.
 
 1) Prepare a matching [XSA](#use-prebuilt-system_topxsa) and [U-Boot ELF](#use-prebuilt-u-bootelf) in the workspace (prebuilt or compiled), install [build dependencies](#install-build-dependencies), then move to the workspace directory
 ```
@@ -167,6 +177,8 @@ cp -f "$MY_APP_DIR/workspace/output_boot_bin/BOOT.BIN" "$BOOT_PATH/BOOT.BIN"
 
 Script: [use-prebuilt-dtb.sh](sw/use-prebuilt-dtb.sh) — `bash sw/use-prebuilt-dtb.sh "$BOOT_PATH"`.
 
+**Running this script runs the complete command sequence in this section for the selected option.** Complete any stated prerequisites first, then run either the script or the manual commands below, not both.
+
 1) Copy prebuilt system.dtb to sd card
 ```
 cp -f "$MY_APP_DIR/prebuilt/system.dtb" "$BOOT_PATH/system.dtb"
@@ -175,6 +187,8 @@ cp -f "$MY_APP_DIR/prebuilt/system.dtb" "$BOOT_PATH/system.dtb"
 ### Compile system.dtb
 
 Script: [compile-dtb.sh](sw/compile-dtb.sh) — `bash sw/compile-dtb.sh "$BOOT_PATH"`. Install build dependencies first. This builds and copies the DTB to the card.
+
+**After installing prerequisites, running this script performs all build and copy steps in this section.** Run either the script or the manual build commands below, not both. The script starts with a fresh source checkout.
 
 1) Install prerequisites:
 ```
@@ -230,6 +244,8 @@ cp -f "$MY_APP_DIR/workspace/system.dtb" "$BOOT_PATH/system.dtb"
 
 Script: [use-prebuilt-xsa.sh](sw/use-prebuilt-xsa.sh) — `bash sw/use-prebuilt-xsa.sh 3CG`. Use `3EG` for that model.
 
+**Running this script runs the complete command sequence in this section for the selected option.** Complete any stated prerequisites first, then run either the script or the manual commands below, not both.
+
 1) Copy prebuilt system_top.xsa to workspace
 ```
 cp -f "$MY_APP_DIR/prebuilt/3CG/system_top.xsa" "$MY_APP_DIR/workspace/system_top.xsa"
@@ -243,6 +259,8 @@ cp -f "$MY_APP_DIR/prebuilt/3EG/system_top.xsa" "$MY_APP_DIR/workspace/system_to
 ### Compile system_top.xsa
 
 Script: [compile-xsa.sh](sw/compile-xsa.sh) — `bash sw/compile-xsa.sh 3CG`. Set `XILINX_ROOT` first. Use `3EG` for that model. Windows: [compile-xsa.cmd](sw/compile-xsa.cmd), invoked as `sw\compile-xsa.cmd 3CG`.
+
+**Running this script runs the complete command sequence in this section for the selected option.** Complete any stated prerequisites first, then run either the script or the manual commands below, not both.
 
 1) Source Vivado and Vitis
 
@@ -287,6 +305,8 @@ make -f ../hdl/Makefile DEV=xczu3cg-sbva484-1-e mode=lvds XSA_NAME=system_top.xs
 
 Script: [use-prebuilt-uboot.sh](sw/use-prebuilt-uboot.sh) — `bash sw/use-prebuilt-uboot.sh`.
 
+**Running this script runs the complete command sequence in this section for the selected option.** Complete any stated prerequisites first, then run either the script or the manual commands below, not both.
+
 1) Copy prebuilt u-boot.elf to workspace
 ```
 cp -f "$MY_APP_DIR/prebuilt/u-boot.elf" "$MY_APP_DIR/workspace/u-boot.elf"
@@ -295,6 +315,8 @@ cp -f "$MY_APP_DIR/prebuilt/u-boot.elf" "$MY_APP_DIR/workspace/u-boot.elf"
 ### Compile u-boot.elf
 
 Script: [compile-uboot.sh](sw/compile-uboot.sh) — `bash sw/compile-uboot.sh`. Install build dependencies first.
+
+**After installing prerequisites, running this script performs all build and copy steps in this section.** Run either the script or the manual build commands below, not both. The script starts with a fresh source checkout.
 
 1) Install build dependencies
 ```
@@ -368,6 +390,8 @@ cp -f "$MY_APP_DIR/u-boot-xlnx/u-boot.elf" "$MY_APP_DIR/workspace/u-boot.elf"
 ### Finalize the SD card
 
 Script: [finalize-sd.sh](sw/finalize-sd.sh) — `bash sw/finalize-sd.sh "$BOOT_PATH"`.
+
+**Running this script runs all commands in this section.** Run either the script or the manual commands below, not both; safely unmount/eject the card afterward.
 
 Install the supplied Bytepipe `boot.scr` after the kernel, BOOT.BIN, and device tree. Its source is [sw/boot.txt](sw/boot.txt): it loads `Image` and `system.dtb` from `mmc 0:1`, uses `/dev/mmcblk0p2` as the root filesystem, and selects `ttyPS0` at 115200 baud. These assumptions must match the board's SD numbering. An existing U-Boot environment or higher-priority boot configuration can change which files are loaded; inspect the serial boot log if the expected script is not selected.
 
