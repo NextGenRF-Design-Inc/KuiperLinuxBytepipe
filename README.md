@@ -2,18 +2,17 @@
 Tutorial for running Kuiper Linux on the Bytepipe
 
 ### What is this?
-This README a guide that illustrates how set up a Kuiper Linux SD card that works with the Bytepipe.
+This README is a guide that illustrates how to set up a Kuiper Linux SD card that works with the Bytepipe.
   - **Quick Start:** follow the tutorial and use prebuilt files as directed.
-  - **Build from Source:** Skip the "prebuilt" options offered in the tutorial.
+  - **Build components from source:** Build the HDL, U-Boot, device tree, and BOOT.BIN using the sections below. The supplied kernel and model-specific FSBL remain prebuilt; this guide does not rebuild them.
 
 ### Why Kuiper Linux?
-Kuiper Linux is pre-loaded with thousands of drivers for ADI products. This provides greater ease when developing with the ADRV9002 installed on the Bytepipe. 
+Kuiper Linux is pre-loaded with thousands of drivers for ADI products. This provides greater ease when developing with the ADRV9002 installed on the Bytepipe.
 
-In addition, GNU-radio is pre-installed to further facilitate embedded development.
+In addition, GNU Radio is pre-installed to further facilitate embedded development.
 
-[More Infomation about Kuiper Linux](https://www.analog.com/en/resources/evaluation-hardware-and-software/embedded-development-software/kuiper-linux.html#software-overview)
+[More Information about Kuiper Linux](https://www.analog.com/en/resources/evaluation-hardware-and-software/embedded-development-software/kuiper-linux.html#software-overview)
 
-# 
 
 ### Overview
 
@@ -27,9 +26,9 @@ In addition, GNU-radio is pre-installed to further facilitate embedded developme
     - Finalize Kuiper enabled sd card for booting on Bytepipe
 
 ### Attention: Run Linux natively or on a Virtual Machine for everything other than building HDL
-Building system.dtb, u-boot.elf, and BOOT.BIN is much simpler when running a linux OS on your build machine, so most of the steps in this guide will only be accompanied by linux bash command line code. 
+Building system.dtb, u-boot.elf, and BOOT.BIN is much simpler when running a linux OS on your build machine, so most of the steps in this guide will only be accompanied by linux bash command line code.
 
-If you are running a windows machine, command line code is available for cloning this repo and building hdl in Vivado. After performing those two tasks, I reccomend you use a virtual machine to run Ubuntu v20.04 or v22.04. 
+If you are running a windows machine, command line code is available for cloning this repo and building hdl in Vivado. After performing those two tasks, I recommend you use a virtual machine to run Ubuntu v20.04 or v22.04.
 
 ## Project directory selection
 1) Clone
@@ -40,6 +39,8 @@ git clone https://github.com/NextGenRF-Design-Inc/KuiperLinuxBytepipe.git
 cd KuiperLinuxBytepipe
 ```
 2) Setup workspace inside the cloned repository
+
+Script: [setup-workspace.sh](sw/setup-workspace.sh) — `bash sw/setup-workspace.sh` after cloning.
 
 Linux Terminal or Windows Git Bash (run from the repository directory):
 ```bash
@@ -64,12 +65,30 @@ mkdir -p "$MY_APP_DIR/workspace"
 
 SD-card and workspace artifact copies use absolute paths anchored to these variables. Build sections explicitly select their working directory; run the steps within each section in order.
 
+The linked scripts are alternatives to the manual commands in each section. They locate the repository from their own location, so they do not require `MY_APP_DIR` and can be invoked by absolute path from any directory. SD-card scripts accept `BOOT_PATH` as an argument or exported variable and require it to be a writable mount point. Run scripts with Bash on Linux (workspace setup also works in Git Bash); only the HDL build has a Windows Command Prompt script. Each script supports `--help`.
+
+The build scripts do not install packages automatically. Run the dependency section first. The Linux and U-Boot scripts create fresh source checkouts and stop if those directories already exist, preserving existing work. For a retry, use the manual commands in the existing checkout or move it aside. The HDL Makefile requires a repository path without spaces.
+
+For Xilinx builds, set `XILINX_ROOT` to the directory containing `Vivado/` and `Vitis/` (for example `/opt/Xilinx`). This guide requires version **2023.2**. Linux and U-Boot use the distribution's `aarch64-linux-gnu-` compiler by default; export `CROSS_COMPILE` to override it.
+
 ## Kuiper Linux Setup
-Kuiper Linux is a distribution based on Raspberry Pi OS for the Raspberry Pi. It incorporates thousands of Linux device drivers for ADI products.
-Kuiper Linux is provided by Analog Devices.
+Kuiper Linux is provided by Analog Devices and supports multiple evaluation platforms, including ZynqMP. This guide uses Bytepipe-specific boot files with the Kuiper root filesystem. Use the **2023_r2 Patch1** image from the [ADI release notes](https://wiki.analog.com/resources/tools-software/linux-software/adi-kuiper_images/release_notes) with the source versions below. The exact image used to validate the supplied binaries is not recorded in this repository; board-level compatibility still needs verification.
+
+### Install build dependencies
+
+Script: [install-build-deps.sh](sw/install-build-deps.sh).
+
+Required for source builds on Ubuntu/Debian; prebuilt file copies do not need these packages. This script runs `sudo apt update` and installs the compiler, build tools, and libraries used below. Vivado/Vitis must be installed separately.
+
+```bash
+bash "$MY_APP_DIR/sw/install-build-deps.sh"
+```
 
 ### 1. Flash generic Kuiper Image to sd card
-1) Download Kuiper Image from https://wiki.analog.com/resources/tools-software/linux-software/adi-kuiper_images/release_notes
+
+Script: [install-kernel.sh](sw/install-kernel.sh) — `bash sw/install-kernel.sh prebuilt "$BOOT_PATH"`. This script performs the kernel copy after flashing; download and flashing remain manual. Use `stock` to select the image already on the card.
+
+1) Download the 2023_r2 Patch1 Kuiper image from https://wiki.analog.com/resources/tools-software/linux-software/adi-kuiper_images/release_notes
 ![Kuiper_Download](kuiper_download_click.png)
 2) Flash Kuiper Image to SD card. Use Kuiper Imager tool if possible.
 3) Copy our modified ADI Linux Kernel to the root (or top-level) of sd card's BOOT partition.
@@ -83,19 +102,22 @@ export BOOT_PATH="<absolute path to the SD card BOOT partition>"
 cp -f "$BOOT_PATH/zynqmp-common/Image" "$BOOT_PATH/Image"
 ```
 
-At this point, your Kuiper sd card only missing **BOOT.BIN** and **system.dtb**. 
-Both of which can be aquired from this repo's [prebuilt](prebuilt/) directory or built from scratch.
-BOOT.BIN is Bytepipe model specific, but system.dtb is not.
+Next, install **BOOT.BIN** and **system.dtb**, then complete [Finalize the SD card](#finalize-the-sd-card) to install the Bytepipe boot script.
+Both can be acquired from this repo's [prebuilt](prebuilt/) directory or built from scratch.
+BOOT.BIN, FSBL, and XSA must all match your Bytepipe model (3CG or 3EG). This repository supplies one shared system.dtb; its hardware layout must still match your board and HDL.
 
-For a prebuilt BOOT.BIN, click on [Use Prebuilt BOOT.BIN](#2a-use-prebuilt-bootbin). 
+For a prebuilt BOOT.BIN, click on [Use Prebuilt BOOT.BIN](#2a-use-prebuilt-bootbin).
 
-To compile a BOOT.BIN,continue to the "Compile BOOT.BIN" section or click on [Compile BOOT.BIN](#2b-compile-bootbin).
+To compile a BOOT.BIN, continue to the "Compile BOOT.BIN" section or click on [Compile BOOT.BIN](#2b-compile-bootbin).
 
 For a prebuilt system.dtb, click on [Use Prebuilt system.dtb](#use-prebuilt-systemdtb).
 
 To compile system.dtb, click on [Compile system.dtb](#compile-systemdtb).
 
 ### 2a. Use Prebuilt BOOT.BIN
+
+Script: [use-prebuilt-boot-bin.sh](sw/use-prebuilt-boot-bin.sh) — `bash sw/use-prebuilt-boot-bin.sh 3CG "$BOOT_PATH"`. Use `3EG` for that model.
+
 1) Copy prebuilt BOOT.BIN to sd card
 ```
 cp -f "$MY_APP_DIR/prebuilt/BOOT_3CG.BIN" "$BOOT_PATH/BOOT.BIN"
@@ -107,13 +129,15 @@ cp -f "$MY_APP_DIR/prebuilt/BOOT_3EG.BIN" "$BOOT_PATH/BOOT.BIN"
 
 ### 2b. Compile BOOT.BIN
 
-1) Move to workspace directory
+Script: [compile-boot-bin.sh](sw/compile-boot-bin.sh) — `bash sw/compile-boot-bin.sh 3CG "$BOOT_PATH"`. Set `XILINX_ROOT` first. Use `3EG` for that model; prepare the matching XSA and U-Boot first.
+
+1) Prepare a matching [XSA](#use-prebuilt-system_topxsa) and [U-Boot ELF](#use-prebuilt-u-bootelf) in the workspace (prebuilt or compiled), install [build dependencies](#install-build-dependencies), then move to the workspace directory
 ```
 cd "$MY_APP_DIR/workspace"
 ```
-2) FSBL files zynqmp_fsbl_3cg.elf and zynqmp_fsbl_3eg.elf are included in this repo's sw directory.
+2) FSBL files zynqmp_fsbl_3cg.elf and zynqmp_fsbl_3eg.elf are included in this repo's prebuilt directory.
 
-   
+
 Copy the one that matches your bytepipe model and rename the copy to "fsbl.elf".
 ```
 cp -f ../prebuilt/zynqmp_fsbl_3cg.elf ./fsbl.elf
@@ -122,23 +146,26 @@ cp -f ../prebuilt/zynqmp_fsbl_3cg.elf ./fsbl.elf
 ```
 cp -f ../prebuilt/zynqmp_fsbl_3eg.elf ./fsbl.elf
 ```
-3) Run [build_zynqmp_boot_bin_external_fsbl.sh](sw/build_zynqmp_boot_bin_external_fsbl.sh). build_zynqmp_boot_bin_external_fsbl.sh is a modified boot.bin build script that uses the fsbl.elf in the same directory as the boot.bin build script. The original is found [here](https://raw.githubusercontent.com/analogdevicesinc/wiki-scripts/main/zynqmp_boot_bin/build_zynqmp_boot_bin.sh).
-   
+3) Run [build_zynqmp_boot_bin_external_fsbl.sh](sw/build_zynqmp_boot_bin_external_fsbl.sh). build_zynqmp_boot_bin_external_fsbl.sh is a modified boot.bin build script that uses fsbl.elf from the current working directory (`workspace`). It regenerates `workspace/build_boot_bin` and `workspace/output_boot_bin` on each run. The original is found [here](https://raw.githubusercontent.com/analogdevicesinc/wiki-scripts/main/zynqmp_boot_bin/build_zynqmp_boot_bin.sh).
+
 **system_top.xsa compile instructions are [here](#compile-system_topxsa) and prebuilt instructions are [here](#use-prebuilt-system_topxsa)**
 
 **u-boot.elf compile instructions are [here](#compile-u-bootelf) and prebuilt instructions are [here](#use-prebuilt-u-bootelf)**
 
 ```
-chmod +x ../sw/build_zynqmp_boot_bin_external_fsbl.sh
-./../sw/build_zynqmp_boot_bin_external_fsbl.sh system_top.xsa u-boot.elf download
+source "$XILINX_ROOT/Vivado/2023.2/settings64.sh"
+source "$XILINX_ROOT/Vitis/2023.2/settings64.sh"
+bash ../sw/build_zynqmp_boot_bin_external_fsbl.sh system_top.xsa u-boot.elf download
 ```
-**Note: The download option pulls the bl31.elf (ARM Trusted Firmware runtime binary compiled for Exception Level 3) from the web.**
+**Note:** `download` clones Xilinx ARM Trusted Firmware and builds `bl31.elf` locally using `aarch64-linux-gnu-gcc`. The source branch is selected from the detected Vitis version. Source the Vivado/Vitis 2023.2 environments before running the manual commands; the wrapper script does this using `XILINX_ROOT`.
 
 4) Copy BOOT.BIN to sd card BOOT directory
 ```
 cp -f "$MY_APP_DIR/workspace/output_boot_bin/BOOT.BIN" "$BOOT_PATH/BOOT.BIN"
 ```
 ### Use Prebuilt system.dtb
+
+Script: [use-prebuilt-dtb.sh](sw/use-prebuilt-dtb.sh) — `bash sw/use-prebuilt-dtb.sh "$BOOT_PATH"`.
 
 1) Copy prebuilt system.dtb to sd card
 ```
@@ -147,11 +174,13 @@ cp -f "$MY_APP_DIR/prebuilt/system.dtb" "$BOOT_PATH/system.dtb"
 
 ### Compile system.dtb
 
+Script: [compile-dtb.sh](sw/compile-dtb.sh) — `bash sw/compile-dtb.sh "$BOOT_PATH"`. Install build dependencies first. This builds and copies the DTB to the card.
+
 1) Install prerequisites:
 ```
 sudo apt update
 sudo apt install -y \
-    git make gcc-aarch64-linux-gnu binutils-aarch64-linux-gnu \
+    git build-essential gcc-aarch64-linux-gnu binutils-aarch64-linux-gnu \
     bc bison flex libssl-dev libelf-dev device-tree-compiler \
     u-boot-tools
 ```
@@ -167,10 +196,8 @@ cd linux-adi-2023-r2-p1
 ```
 3) Configure ZynqMP kernel tree
 ```
-XILINX_AMD_TOOLS=<path to directory containing xilinx installation>
-
 export ARCH=arm64
-export CROSS_COMPILE="${XILINX_AMD_TOOLS}/Xilinx/Vitis/2023.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-"
+export CROSS_COMPILE="${CROSS_COMPILE:-aarch64-linux-gnu-}"
 
 make adi_zynqmp_defconfig
 ```
@@ -178,7 +205,7 @@ make adi_zynqmp_defconfig
 ```
 export LIN_DTS_DIR=arch/arm64/boot/dts/xilinx
 
-cp ../sw/zynqmp-bytepipe_v2023_2.dts \
+cp ../sw/bytepipe.dts \
    "$LIN_DTS_DIR/bytepipe.dts"
 ```
 5) Register your device tree in the device tree makefile.
@@ -201,6 +228,8 @@ cp -f "$MY_APP_DIR/workspace/system.dtb" "$BOOT_PATH/system.dtb"
 
 ### Use Prebuilt system_top.xsa
 
+Script: [use-prebuilt-xsa.sh](sw/use-prebuilt-xsa.sh) — `bash sw/use-prebuilt-xsa.sh 3CG`. Use `3EG` for that model.
+
 1) Copy prebuilt system_top.xsa to workspace
 ```
 cp -f "$MY_APP_DIR/prebuilt/3CG/system_top.xsa" "$MY_APP_DIR/workspace/system_top.xsa"
@@ -209,20 +238,22 @@ cp -f "$MY_APP_DIR/prebuilt/3CG/system_top.xsa" "$MY_APP_DIR/workspace/system_to
 ```
 cp -f "$MY_APP_DIR/prebuilt/3EG/system_top.xsa" "$MY_APP_DIR/workspace/system_top.xsa"
 ```
-**Note: system_top.xsa is actually a zip folder, so renaming only the xsa folder does not rename it's contents. Mismatch between xsa file name and contents will cause errors in BOOT.BIN creation. Exporting the vivado project hardware as system_top.xsa is better so there is no confusion.**
+**Note:** XSA is an archive. The existing BOOT.BIN builder specifically expects `system_top.xsa` and an exported `system_top.bit`. The HDL build exports that name by default; renaming an arbitrary XSA does not change the names inside it.
 
-### Compile system_top.xsa 
+### Compile system_top.xsa
+
+Script: [compile-xsa.sh](sw/compile-xsa.sh) — `bash sw/compile-xsa.sh 3CG`. Set `XILINX_ROOT` first. Use `3EG` for that model. Windows: [compile-xsa.cmd](sw/compile-xsa.cmd), invoked as `sw\compile-xsa.cmd 3CG`.
 
 1) Source Vivado and Vitis
-   
+
 Windows Command Prompt:
 ```
-set XILINX_AMD_TOOLS=<path to directory containing xilinx installation>
-call %XILINX_AMD_TOOLS%\Xilinx\Vivado\2023.2\settings64.bat
+set "XILINX_ROOT=C:\Xilinx"
+call "%XILINX_ROOT%\Vivado\2023.2\settings64.bat"
 vivado -version
 echo %XILINX_VIVADO%
 where vivado
-call %XILINX_AMD_TOOLS%\Xilinx\Vitis\2023.2\settings64.bat
+call "%XILINX_ROOT%\Vitis\2023.2\settings64.bat"
 vitis -version
 echo %XILINX_VITIS%
 where vitis
@@ -230,29 +261,31 @@ where vitis
 
 Linux Terminal:
 ```
-export XILINX_AMD_TOOLS=<path to directory containing xilinx installation>
-source $XILINX_AMD_TOOLS/Xilinx/Vivado/2023.2/settings64.sh
+export XILINX_ROOT="/opt/Xilinx"
+source "$XILINX_ROOT/Vivado/2023.2/settings64.sh"
 vivado -version
 which vivado
-source $XILINX_AMD_TOOLS/Xilinx/Vitis/2023.2/settings64.sh
+source "$XILINX_ROOT/Vitis/2023.2/settings64.sh"
 vitis -version
 which vitis
 ```
-2) Run HDL build makefile
+2) Run HDL build makefile (examples use 3CG; substitute `xczu3eg` for 3EG). GNU Make and Git must be on PATH. The Linux Makefile uses `DEV` and lowercase `mode`; the Windows Makefile uses `DEVICE` and `MODE`.
 
 Windows Command Prompt:
 ```
 cd /d "%MY_APP_DIR%\workspace"
-make -f ..\hdl\Makefile.windows DEVICE=<xczu3cg,xczu3eg> MODE=lvds
+make -f ..\hdl\Makefile.windows DEVICE=xczu3cg MODE=lvds
 ```
 
 Linux Terminal:
 ```
 cd "$MY_APP_DIR/workspace"
-make -f ../hdl/Makefile
+make -f ../hdl/Makefile DEV=xczu3cg-sbva484-1-e mode=lvds XSA_NAME=system_top.xsa
 ```
 
 ### Use Prebuilt u-boot.elf
+
+Script: [use-prebuilt-uboot.sh](sw/use-prebuilt-uboot.sh) — `bash sw/use-prebuilt-uboot.sh`.
 
 1) Copy prebuilt u-boot.elf to workspace
 ```
@@ -260,6 +293,8 @@ cp -f "$MY_APP_DIR/prebuilt/u-boot.elf" "$MY_APP_DIR/workspace/u-boot.elf"
 ```
 
 ### Compile u-boot.elf
+
+Script: [compile-uboot.sh](sw/compile-uboot.sh) — `bash sw/compile-uboot.sh`. Install build dependencies first.
 
 1) Install build dependencies
 ```
@@ -296,9 +331,9 @@ cd u-boot-xlnx
 4) Set the cross-compilation environment
 ```
 export ARCH=arm
-export CROSS_COMPILE=$XILINX_AMD_TOOLS/Xilinx/Vitis/2023.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-
+export CROSS_COMPILE="${CROSS_COMPILE:-aarch64-linux-gnu-}"
 ```
-5) Clean the source tree
+5) Clean the source tree (only in a disposable build checkout; this removes generated configuration)
 ```
 make distclean
 ```
@@ -310,7 +345,7 @@ make xilinx_zynqmp_virt_defconfig
 ```
 export DTS_DIR=arch/arm/dts/
 
-cp ../sw/zynqmp-bytepipe_v2023_2_uboot.dts \
+cp ../sw/bytepipe_uboot.dts \
    "$DTS_DIR/bytepipe_uboot.dts"
 ```
 
@@ -330,3 +365,15 @@ cp -f "$MY_APP_DIR/u-boot-xlnx/u-boot.elf" "$MY_APP_DIR/workspace/u-boot.elf"
 ```
 
 
+### Finalize the SD card
+
+Script: [finalize-sd.sh](sw/finalize-sd.sh) — `bash sw/finalize-sd.sh "$BOOT_PATH"`.
+
+Install the supplied Bytepipe `boot.scr` after the kernel, BOOT.BIN, and device tree. Its source is [sw/boot.txt](sw/boot.txt): it loads `Image` and `system.dtb` from `mmc 0:1`, uses `/dev/mmcblk0p2` as the root filesystem, and selects `ttyPS0` at 115200 baud. These assumptions must match the board's SD numbering. An existing U-Boot environment or higher-priority boot configuration can change which files are loaded; inspect the serial boot log if the expected script is not selected.
+
+```bash
+cp -f "$MY_APP_DIR/prebuilt/boot.scr" "$BOOT_PATH/boot.scr"
+sync
+```
+
+Safely unmount/eject the card before removing it. Boot the Bytepipe from SD and verify the serial log and `iio_info` output. Source builds and file copies alone do not establish that the ADRV9002 or every peripheral works. The repository does not document the custom kernel's patch set or module installation procedure; use matching kernel modules in the root filesystem when changing kernels. The stock kernel option may lack Bytepipe-specific changes.
