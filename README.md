@@ -39,14 +39,31 @@ Windows Command Prompt, Windows Git Bash, or Linux Terminal
 git clone https://github.com/NextGenRF-Design-Inc/KuiperLinuxBytepipe.git
 cd KuiperLinuxBytepipe
 ```
-2) Setup workspace
-Windows Command Prompt, Windows Git Bash, or Linux Terminal
-```
-cd <path to desired parent directory that will hold your project>
+2) Setup workspace inside the cloned repository
 
-mkdir workspace
-cd workspace
+Linux Terminal or Windows Git Bash (run from the repository directory):
+```bash
+export MY_APP_DIR="$(pwd -P)"
+mkdir -p "$MY_APP_DIR/workspace"
 ```
+
+Windows Command Prompt (run from the repository directory):
+```bat
+set "MY_APP_DIR=%CD%"
+if not exist "%MY_APP_DIR%\workspace" mkdir "%MY_APP_DIR%\workspace"
+```
+
+`MY_APP_DIR` is the absolute path to the cloned `KuiperLinuxBytepipe` repository. The `workspace` subdirectory holds boot-assembly inputs and outputs; kernel and U-Boot builds run in their own source trees. In a new terminal, set `MY_APP_DIR` again to that same absolute path; when switching to Linux or a VM, use the repository path as seen by that environment.
+
+Each section below assumes these paths are set in the current shell. The Linux SD-card steps also require `BOOT_PATH`, the absolute mount path of the flashed card's BOOT partition. Replace the placeholders before running:
+```bash
+export MY_APP_DIR="<absolute path to KuiperLinuxBytepipe>"
+export BOOT_PATH="<absolute path to the SD card BOOT partition>"
+mkdir -p "$MY_APP_DIR/workspace"
+```
+
+SD-card and workspace artifact copies use absolute paths anchored to these variables. Build sections explicitly select their working directory; run the steps within each section in order.
+
 ## Kuiper Linux Setup
 Kuiper Linux is a distribution based on Raspberry Pi OS for the Raspberry Pi. It incorporates thousands of Linux device drivers for ADI products.
 Kuiper Linux is provided by Analog Devices.
@@ -57,15 +74,13 @@ Kuiper Linux is provided by Analog Devices.
 2) Flash Kuiper Image to SD card. Use Kuiper Imager tool if possible.
 3) Copy our modified ADI Linux Kernel to the root (or top-level) of sd card's BOOT partition.
 ```
-export BOOT_PATH=<path to BOOT partition of your SD card post flash>
-cd $BOOT_PATH
-cp -f ../prebuilt/Image $BOOT_PATH/Image
+export BOOT_PATH="<absolute path to the SD card BOOT partition>"
+cp -f "$MY_APP_DIR/prebuilt/Image" "$BOOT_PATH/Image"
 ```
 - If you want to start with a default ADI Linux Kernel Image, copy the zynqmp common Image file to root (or top-level) of sd card's BOOT partition.
 ```
-export BOOT_PATH=<path to BOOT partition of your SD card post flash>
-cd $BOOT_PATH
-cp -f $BOOT_PATH/zynqmp-common/Image $BOOT_PATH/Image
+export BOOT_PATH="<absolute path to the SD card BOOT partition>"
+cp -f "$BOOT_PATH/zynqmp-common/Image" "$BOOT_PATH/Image"
 ```
 
 At this point, your Kuiper sd card only missing **BOOT.BIN** and **system.dtb**. 
@@ -83,23 +98,18 @@ To compile system.dtb, click on [Compile system.dtb](#compile-systemdtb).
 ### 2a. Use Prebuilt BOOT.BIN
 1) Copy prebuilt BOOT.BIN to sd card
 ```
-export MY_APP_DIR=<project folder path>
-cd $MY_APP_DIR
-```
-```
-cp -f  prebuilt/BOOT_3CG.BIN $BOOT_PATH/BOOT.BIN
+cp -f "$MY_APP_DIR/prebuilt/BOOT_3CG.BIN" "$BOOT_PATH/BOOT.BIN"
 ```
 -or-
 ```
-cp -f  prebuilt/BOOT_3EG.BIN $BOOT_PATH/BOOT.BIN
+cp -f "$MY_APP_DIR/prebuilt/BOOT_3EG.BIN" "$BOOT_PATH/BOOT.BIN"
 ```
 
 ### 2b. Compile BOOT.BIN
 
 1) Move to workspace directory
 ```
-export MY_APP_DIR=<project folder path>
-cd $MY_APP_DIR/workspace
+cd "$MY_APP_DIR/workspace"
 ```
 2) FSBL files zynqmp_fsbl_3cg.elf and zynqmp_fsbl_3eg.elf are included in this repo's sw directory.
 
@@ -114,7 +124,7 @@ cp -f ../prebuilt/zynqmp_fsbl_3eg.elf ./fsbl.elf
 ```
 3) Run [build_zynqmp_boot_bin_external_fsbl.sh](sw/build_zynqmp_boot_bin_external_fsbl.sh). build_zynqmp_boot_bin_external_fsbl.sh is a modified boot.bin build script that uses the fsbl.elf in the same directory as the boot.bin build script. The original is found [here](https://raw.githubusercontent.com/analogdevicesinc/wiki-scripts/main/zynqmp_boot_bin/build_zynqmp_boot_bin.sh).
    
-**system_top.xsa compile instructions are [here](#compile-system_topxsa) and prebuilt instructions are [here](#use-prebuilt-systemdtb)** 
+**system_top.xsa compile instructions are [here](#compile-system_topxsa) and prebuilt instructions are [here](#use-prebuilt-system_topxsa)**
 
 **u-boot.elf compile instructions are [here](#compile-u-bootelf) and prebuilt instructions are [here](#use-prebuilt-u-bootelf)**
 
@@ -126,15 +136,13 @@ chmod +x ../sw/build_zynqmp_boot_bin_external_fsbl.sh
 
 4) Copy BOOT.BIN to sd card BOOT directory
 ```
-cp -f output_boot_bin/BOOT.BIN $BOOT_PATH/Image
+cp -f "$MY_APP_DIR/workspace/output_boot_bin/BOOT.BIN" "$BOOT_PATH/BOOT.BIN"
 ```
 ### Use Prebuilt system.dtb
 
 1) Copy prebuilt system.dtb to sd card
 ```
-export MY_APP_DIR=<project folder path>
-cd $MY_APP_DIR
-cp -f prebuilt/system.dtb $BOOT_PATH/system.dtb
+cp -f "$MY_APP_DIR/prebuilt/system.dtb" "$BOOT_PATH/system.dtb"
 ```
 
 ### Compile system.dtb
@@ -149,7 +157,7 @@ sudo apt install -y \
 ```
 2) Clone ADI linux kernel repo
 ```
-cd $MY_APP_DIR
+cd "$MY_APP_DIR"
 git clone --depth 1 \
     --branch 2023_r2_p1 \
     https://github.com/analogdevicesinc/linux.git \
@@ -178,27 +186,28 @@ cp ../sw/zynqmp-bytepipe_v2023_2.dts \
 chmod +x ../sw/add-zynqmp-dtb.sh
 ./../sw/add-zynqmp-dtb.sh bytepipe.dtb
 ```
-5) Compile .dtb
+6) Compile .dtb
 ```
 make xilinx/bytepipe.dtb
 ```
-6) Copy bytepipe.dtb to workspace directory as system.dtb
+7) Copy bytepipe.dtb to workspace directory as system.dtb
 ```
-cp -f arch/arm64/boot/dts/xilinx/bytepipe.dtb ../workspace/system.dtb
+cp -f "$MY_APP_DIR/linux-adi-2023-r2-p1/arch/arm64/boot/dts/xilinx/bytepipe.dtb" "$MY_APP_DIR/workspace/system.dtb"
 ```
+8) Copy system.dtb to the SD card BOOT partition
+```bash
+cp -f "$MY_APP_DIR/workspace/system.dtb" "$BOOT_PATH/system.dtb"
+```
+
 ### Use Prebuilt system_top.xsa
 
 1) Copy prebuilt system_top.xsa to workspace
 ```
-export MY_APP_DIR=<project folder path>
-cd $MY_APP_DIR
-```
-```
-cp -f prebuilt/3CG/system_top.xsa workspace/system_top.xsa
+cp -f "$MY_APP_DIR/prebuilt/3CG/system_top.xsa" "$MY_APP_DIR/workspace/system_top.xsa"
 ```
 -or-
 ```
-cp -f prebuilt/3EG/system_top.xsa workspace/system_top.xsa
+cp -f "$MY_APP_DIR/prebuilt/3EG/system_top.xsa" "$MY_APP_DIR/workspace/system_top.xsa"
 ```
 **Note: system_top.xsa is actually a zip folder, so renaming only the xsa folder does not rename it's contents. Mismatch between xsa file name and contents will cause errors in BOOT.BIN creation. Exporting the vivado project hardware as system_top.xsa is better so there is no confusion.**
 
@@ -233,13 +242,13 @@ which vitis
 
 Windows Command Prompt:
 ```
-cd <project workspace directory>
+cd /d "%MY_APP_DIR%\workspace"
 make -f ..\hdl\Makefile.windows DEVICE=<xczu3cg,xczu3eg> MODE=lvds
 ```
 
 Linux Terminal:
 ```
-cd <project workspace directory>
+cd "$MY_APP_DIR/workspace"
 make -f ../hdl/Makefile
 ```
 
@@ -247,9 +256,7 @@ make -f ../hdl/Makefile
 
 1) Copy prebuilt u-boot.elf to workspace
 ```
-export MY_APP_DIR=<project folder path>
-cd $MY_APP_DIR
-cp -f prebuilt/u-boot.elf workspace/u-boot.elf
+cp -f "$MY_APP_DIR/prebuilt/u-boot.elf" "$MY_APP_DIR/workspace/u-boot.elf"
 ```
 
 ### Compile u-boot.elf
@@ -276,7 +283,7 @@ sudo apt install -y \
 ```
 2) Clone the Xilinx 2023.2 branch
 ```
-cd $MY_APP_DIR
+cd "$MY_APP_DIR"
 git clone \
     --branch xilinx-v2023.2 \
     --depth 1 \
@@ -319,7 +326,7 @@ make -j"$(nproc)" \
 ```
 10) Copy u-boot.elf to workspace directory
 ```
-cp -f u-boot.elf ../workspace/u-boot.elf
+cp -f "$MY_APP_DIR/u-boot-xlnx/u-boot.elf" "$MY_APP_DIR/workspace/u-boot.elf"
 ```
 
 
