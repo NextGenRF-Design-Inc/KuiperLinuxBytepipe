@@ -172,9 +172,10 @@ cp -f ../prebuilt/zynqmp_fsbl_3eg.elf ./fsbl.elf
 ```
 3) Run [build_zynqmp_boot_bin_external_fsbl.sh](sw/build_zynqmp_boot_bin_external_fsbl.sh). build_zynqmp_boot_bin_external_fsbl.sh is a modified boot.bin build script that uses fsbl.elf from the current working directory (`workspace`). It regenerates `workspace/build_boot_bin` and `workspace/output_boot_bin` on each run. The original is found [here](https://raw.githubusercontent.com/analogdevicesinc/wiki-scripts/main/zynqmp_boot_bin/build_zynqmp_boot_bin.sh).
 
-**system_top.xsa compile instructions are [here](#compile-system_topxsa) and prebuilt instructions are [here](#use-prebuilt-system_topxsa)**
-
-**u-boot.elf compile instructions are [here](#compile-u-bootelf) and prebuilt instructions are [here](#use-prebuilt-u-bootelf)**
+| Build input | Use prebuilt | Build from source |
+|---|---|---|
+| `system_top.xsa` | [Use prebuilt →](#use-prebuilt-system_topxsa) | [Compile →](#compile-system_topxsa) |
+| `u-boot.elf` | [Use prebuilt →](#use-prebuilt-u-bootelf) | [Compile →](#compile-u-bootelf) |
 
 ```
 source "$XILINX_ROOT/Vivado/2023.2/settings64.sh"
