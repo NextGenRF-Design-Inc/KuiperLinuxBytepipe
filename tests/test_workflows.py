@@ -75,6 +75,14 @@ class Workflows(unittest.TestCase):
         self.run_script('install-kernel.sh', 'stock', str(self.boot))
         self.assertEqual((self.boot / 'Image').read_text(), 'stock')
 
+    def test_flash_mode_forwards_arguments_without_running_disk_tools(self):
+        self.mock('python3', "printf '%s\\n' \"$@\"")
+        result = self.run_script('install-kernel.sh', 'stock', '--device', '/dev/sdz',
+                                 '--cache-dir', '/tmp/cache with spaces')
+        self.assertEqual(result.stdout.splitlines(),
+                         [str(self.repo / 'sw/flash-kuiper.py'), '--kernel', 'stock',
+                          '--device', '/dev/sdz', '--cache-dir', '/tmp/cache with spaces'])
+
     def test_invalid_inputs_fail_before_copy(self):
         self.run_script('use-prebuilt-boot-bin.sh', 'wrong', ok=False)
         self.run_script('install-kernel.sh', 'wrong', ok=False)

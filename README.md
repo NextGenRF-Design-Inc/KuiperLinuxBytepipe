@@ -67,7 +67,7 @@ mkdir -p "$MY_APP_DIR/workspace"
 
 SD-card and workspace artifact copies use absolute paths anchored to these variables. Build sections explicitly select their working directory; run the steps within each section in order.
 
-Running a linked script performs the command sequence for its section, using the selected model or option. **Run either the script or the manual commands below it; you do not need to run both.** Complete the stated prerequisites first. Exceptions such as manual image flashing are noted beside the script link. They locate the repository from their own location, so they do not require `MY_APP_DIR` and can be invoked by absolute path from any directory. SD-card scripts accept `BOOT_PATH` as an argument or exported variable and require it to be a writable mount point. Run scripts with Bash on Linux (workspace setup also works in Git Bash); only the HDL build has a Windows Command Prompt script. Each script supports `--help`.
+Running a linked script performs the command sequence for its section, using the selected model or option. **Run either the script or the manual commands below it; you do not need to run both.** Complete the stated prerequisites first. Any prerequisites or alternative modes are noted beside the script link. They locate the repository from their own location, so they do not require `MY_APP_DIR` and can be invoked by absolute path from any directory. SD-card copy scripts accept `BOOT_PATH` as an argument or exported variable and require it to be a writable mount point. The kernel installer also offers a `--device` mode that downloads and flashes an SD card, then prints its BOOT mount path. Run scripts with Bash on Linux (workspace setup also works in Git Bash); only the HDL build has a Windows Command Prompt script. Each script supports `--help`.
 
 The build scripts do not install packages automatically. Run the dependency section first. The Linux and U-Boot scripts create fresh source checkouts and stop if those directories already exist, preserving existing work. For a retry, use the manual commands in the existing checkout or move it aside. The HDL Makefile requires a repository path without spaces.
 
@@ -90,23 +90,40 @@ bash "$MY_APP_DIR/sw/install-build-deps.sh"
 
 ### 1. Flash generic Kuiper Image to sd card
 
-Script: [install-kernel.sh](sw/install-kernel.sh) — `bash sw/install-kernel.sh prebuilt "$BOOT_PATH"`. This script performs the kernel copy after flashing; download and flashing remain manual. Use `stock` to select the image already on the card.
+Script: [install-kernel.sh](sw/install-kernel.sh), with Linux flashing support in [flash-kuiper.py](sw/flash-kuiper.py).
 
-**Running this script runs the kernel-copy commands in this section for the selected option.** Download and flash the image first; then run either the script or the manual copy command, not both.
+**With `--device`, this script downloads, verifies, extracts, and flashes the Kuiper image, then mounts BOOT and installs the selected kernel.** You do not need to download, flash, or copy the kernel separately. Use `prebuilt` for this repository's modified kernel or `stock` for the image's `zynqmp-common/Image`.
 
-1) Download the 2023_r2 Patch1 Kuiper image from https://wiki.analog.com/resources/tools-software/linux-software/adi-kuiper_images/release_notes
-![Kuiper_Download](kuiper_download_click.png)
-2) Flash Kuiper Image to SD card. Use Kuiper Imager tool if possible.
-3) Copy our modified ADI Linux Kernel to the root (or top-level) of sd card's BOOT partition.
+Install the flashing prerequisites once (Ubuntu/Debian):
+```bash
+sudo apt update
+sudo apt install -y curl python3 util-linux parted udev coreutils
 ```
+
+List disks, identify the SD card's **whole disk** (for example `/dev/sdb`, not `/dev/sdb1`), and run the installer as your normal user:
+```bash
+lsblk -o NAME,SIZE,MODEL,TRAN,RM,MOUNTPOINTS
+bash "$MY_APP_DIR/sw/install-kernel.sh" prebuilt --device /dev/sdX
+```
+
+Replace `/dev/sdX` with the SD card's actual device. **Flashing erases all data on that disk.** The script displays its identity and requires you to type `ERASE /dev/sdX` with the actual device name before writing. It uses `sudo` for disk operations, rejects system disks, partitions, read-only devices, active storage mappings, and disks backing the repository or download directory. Only removable or USB disks are accepted. Mounted card partitions under `/media`, `/run/media`, or `/mnt` are unmounted after confirmation; other mount locations must be unmounted manually first. There is no unattended confirmation bypass.
+
+The download is pinned to ADI's **2023_r2 Patch1 / 2025-03-18** image. Both the ZIP and extracted image are checked against the MD5 values published in the [ADI release notes](https://wiki.analog.com/resources/tools-software/linux-software/adi-kuiper_images/release_notes). Downloads use HTTPS; MD5 checks detect corruption, not cryptographic authenticity. The script also compares the written disk bytes with the image before installing the kernel.
+
+Verified downloads are reused from `workspace/downloads`. Allow space for both the ZIP and uncompressed image, or select another cache location:
+```bash
+bash "$MY_APP_DIR/sw/install-kernel.sh" prebuilt --device /dev/sdX --cache-dir /path/to/downloads
+```
+
+BOOT is left mounted at `workspace/sd-boot` (or its existing desktop automount location). Run the `export BOOT_PATH=...` command printed by the script in your shell before continuing to the next sections. Do not run both example flashing commands; the second only demonstrates the cache option.
+
+**Copy-only alternative for a card that is already flashed:** the original invocation is still supported and does not erase or download anything:
+```bash
 export BOOT_PATH="<absolute path to the SD card BOOT partition>"
-cp -f "$MY_APP_DIR/prebuilt/Image" "$BOOT_PATH/Image"
+bash "$MY_APP_DIR/sw/install-kernel.sh" prebuilt "$BOOT_PATH"
 ```
-- If you want to start with a default ADI Linux Kernel Image, copy the zynqmp common Image file to root (or top-level) of sd card's BOOT partition.
-```
-export BOOT_PATH="<absolute path to the SD card BOOT partition>"
-cp -f "$BOOT_PATH/zynqmp-common/Image" "$BOOT_PATH/Image"
-```
+
+You can still download the image from the [ADI release notes](https://wiki.analog.com/resources/tools-software/linux-software/adi-kuiper_images/release_notes) and flash it with Kuiper Imager if preferred. Then use copy-only mode above. Substitute `stock` for `prebuilt` to install the stock kernel instead.
 
 Next, install **BOOT.BIN** and **system.dtb**, then complete [Finalize the SD card](#finalize-the-sd-card) to install the Bytepipe boot script.
 Both can be acquired from this repo's [prebuilt](prebuilt/) directory or built from scratch.
