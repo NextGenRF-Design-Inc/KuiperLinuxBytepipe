@@ -15,26 +15,26 @@ set_property  -dict {PACKAGE_PIN H2     IOSTANDARD LVCMOS18}  [get_ports rx1_str
 ########################################################################################################################################
 set_property  -dict {PACKAGE_PIN J2     IOSTANDARD LVCMOS18}  [get_ports rx2_dclk_in_n]     ;## IO_L13N_T2L_N1_GC_QBC_65		
 set_property  -dict {PACKAGE_PIN J3     IOSTANDARD LVCMOS18}  [get_ports rx2_dclk_in_p]     ;## IO_L13P_T2L_N0_GC_QBC_65
-set_property  -dict {PACKAGE_PIN D1     IOSTANDARD LVCMOS18}  [get_ports rx2_idata_in_p]    ;## IO_L21N_T3L_N5_AD8N_65      	# Pins swapped
-set_property  -dict {PACKAGE_PIN E1     IOSTANDARD LVCMOS18}  [get_ports rx2_idata_in_n]    ;## IO_L21P_T3L_N4_AD8P_65      	# Pins swapped
-set_property  -dict {PACKAGE_PIN F1     IOSTANDARD LVCMOS18}  [get_ports rx2_qdata_in_p]    ;## IO_L19N_T3L_N1_DBC_AD9N_65  	# Pins swapped
-set_property  -dict {PACKAGE_PIN G1     IOSTANDARD LVCMOS18}  [get_ports rx2_qdata_in_n]    ;## IO_L19P_T3L_N0_DBC_AD9P_65  	# Pins swapped
-set_property  -dict {PACKAGE_PIN E3     IOSTANDARD LVCMOS18}  [get_ports rx2_strobe_in_p]   ;## IO_L20N_T3L_N3_AD1N_65      	# Pins swapped
-set_property  -dict {PACKAGE_PIN E4     IOSTANDARD LVCMOS18}  [get_ports rx2_strobe_in_n]   ;## IO_L20P_T3L_N2_AD1P_65      	# Pins swapped
+set_property  -dict {PACKAGE_PIN D1     IOSTANDARD LVCMOS18}  [get_ports rx2_idata_in_n]    ;## IO_L21N_T3L_N5_AD8N_65      	# Pins swapped, swapped back in logic (CMOS_SWAP_MASK)
+set_property  -dict {PACKAGE_PIN E1     IOSTANDARD LVCMOS18}  [get_ports rx2_idata_in_p]    ;## IO_L21P_T3L_N4_AD8P_65      	# Pins swapped, swapped back in logic (CMOS_SWAP_MASK)
+set_property  -dict {PACKAGE_PIN F1     IOSTANDARD LVCMOS18}  [get_ports rx2_qdata_in_n]    ;## IO_L19N_T3L_N1_DBC_AD9N_65  	# Pins swapped, swapped back in logic (CMOS_SWAP_MASK)
+set_property  -dict {PACKAGE_PIN G1     IOSTANDARD LVCMOS18}  [get_ports rx2_qdata_in_p]    ;## IO_L19P_T3L_N0_DBC_AD9P_65  	# Pins swapped, swapped back in logic (CMOS_SWAP_MASK)
+set_property  -dict {PACKAGE_PIN E3     IOSTANDARD LVCMOS18}  [get_ports rx2_strobe_in_n]   ;## IO_L20N_T3L_N3_AD1N_65      	# Pins swapped, swapped back in logic (CMOS_SWAP_MASK)
+set_property  -dict {PACKAGE_PIN E4     IOSTANDARD LVCMOS18}  [get_ports rx2_strobe_in_p]   ;## IO_L20P_T3L_N2_AD1P_65      	# Pins swapped, swapped back in logic (CMOS_SWAP_MASK)
 
 ########################################################################################################################################
 # ADRV9002 TX1 Serial Interface
 ########################################################################################################################################
-set_property  -dict {PACKAGE_PIN A3     IOSTANDARD LVCMOS18}  [get_ports tx1_dclk_in_p]     ;## IO_L12N_T1U_N11_GC_66		#Pins swapped
-set_property  -dict {PACKAGE_PIN A4     IOSTANDARD LVCMOS18}  [get_ports tx1_dclk_in_n]     ;## IO_L12P_T1U_N10_GC_66		#Pins swapped
-set_property  -dict {PACKAGE_PIN G4     IOSTANDARD LVCMOS18}  [get_ports tx1_dclk_out_p]    ;## IO_L18N_T2U_N11_AD2N_65		#Pins swapped
-set_property  -dict {PACKAGE_PIN H4     IOSTANDARD LVCMOS18}  [get_ports tx1_dclk_out_n]    ;## IO_L18P_T2U_N10_AD2P_65		#Pins swapped
-set_property  -dict {PACKAGE_PIN F2     IOSTANDARD LVCMOS18}  [get_ports tx1_idata_out_p]   ;## IO_L23N_T3U_N9_65	        #Pins swapped
-set_property  -dict {PACKAGE_PIN F3     IOSTANDARD LVCMOS18}  [get_ports tx1_idata_out_n]   ;## IO_L23P_T3U_N8_I2C_SCLK_65	#Pins swapped
+set_property  -dict {PACKAGE_PIN A3     IOSTANDARD LVCMOS18}  [get_ports tx1_dclk_in_n]     ;## IO_L12N_T1U_N11_GC_66		# Pins swapped, swapped back in logic (CMOS_SWAP_MASK)
+set_property  -dict {PACKAGE_PIN A4     IOSTANDARD LVCMOS18}  [get_ports tx1_dclk_in_p]     ;## IO_L12P_T1U_N10_GC_66		# Pins swapped, swapped back in logic (CMOS_SWAP_MASK)
+set_property  -dict {PACKAGE_PIN G4     IOSTANDARD LVCMOS18}  [get_ports tx1_dclk_out_n]    ;## IO_L18N_T2U_N11_AD2N_65		# Pins swapped, swapped back in logic (CMOS_SWAP_MASK)
+set_property  -dict {PACKAGE_PIN H4     IOSTANDARD LVCMOS18}  [get_ports tx1_dclk_out_p]    ;## IO_L18P_T2U_N10_AD2P_65		# Pins swapped, swapped back in logic (CMOS_SWAP_MASK)
+set_property  -dict {PACKAGE_PIN F2     IOSTANDARD LVCMOS18}  [get_ports tx1_idata_out_n]   ;## IO_L23N_T3U_N9_65	        # Pins swapped, swapped back in logic (CMOS_SWAP_MASK)
+set_property  -dict {PACKAGE_PIN F3     IOSTANDARD LVCMOS18}  [get_ports tx1_idata_out_p]   ;## IO_L23P_T3U_N8_I2C_SCLK_65	# Pins swapped, swapped back in logic (CMOS_SWAP_MASK)
 set_property  -dict {PACKAGE_PIN C3     IOSTANDARD LVCMOS18}  [get_ports tx1_qdata_out_n]   ;## IO_L22N_T3U_N7_DBC_AD0N_65
 set_property  -dict {PACKAGE_PIN D3     IOSTANDARD LVCMOS18}  [get_ports tx1_qdata_out_p]   ;## IO_L22P_T3U_N6_DBC_AD0P_65
-set_property  -dict {PACKAGE_PIN C2     IOSTANDARD LVCMOS18}  [get_ports tx1_strobe_out_p]  ;## IO_L24N_T3U_N11_PERSTN0_65  	#Pins swapped
-set_property  -dict {PACKAGE_PIN D2     IOSTANDARD LVCMOS18}  [get_ports tx1_strobe_out_n]  ;## IO_L24P_T3U_N10_PERSTN1_I2C 	#Pins swapped
+set_property  -dict {PACKAGE_PIN C2     IOSTANDARD LVCMOS18}  [get_ports tx1_strobe_out_n]  ;## IO_L24N_T3U_N11_PERSTN0_65  	# Pins swapped, swapped back in logic (CMOS_SWAP_MASK)
+set_property  -dict {PACKAGE_PIN D2     IOSTANDARD LVCMOS18}  [get_ports tx1_strobe_out_p]  ;## IO_L24P_T3U_N10_PERSTN1_I2C 	# Pins swapped, swapped back in logic (CMOS_SWAP_MASK)
 
 ########################################################################################################################################
 # ADRV9002 TX2 Serial Interface

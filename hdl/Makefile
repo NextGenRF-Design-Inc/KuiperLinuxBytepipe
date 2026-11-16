@@ -34,7 +34,7 @@ adi_hdl: | $(hdlDir)
 $(hdlDir):
 	@mkdir -p $(hdlDir)
 	git clone --branch hdl_2023_r2 https://github.com/analogdevicesinc/hdl.git $(hdlDir)
-	bash -c 'cd $(hdlDir); git am ../../$(srcDir)/0001-Bytepipe-LVDS-inversion-support.patch'
+	bash -c 'cd $(hdlDir); git am ../../$(srcDir)/0001-Bytepipe-LVDS-inversion-and-CMOS-swap-support.patch'
 
 
 

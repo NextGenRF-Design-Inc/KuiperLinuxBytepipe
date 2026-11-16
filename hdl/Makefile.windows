@@ -74,4 +74,4 @@ adi_hdl: | $(hdlDir)
 $(hdlDir):
 	@if not exist "$(wrkDir)/Adi" mkdir "$(wrkDir)/Adi"
 	@git clone --branch hdl_2023_r2 https://github.com/analogdevicesinc/hdl.git "$(hdlDir)" || exit /B 1
-	@git -C "$(hdlDir)" am "$(srcDir)/0001-Bytepipe-LVDS-inversion-support.patch" || exit /B 1
+	@git -C "$(hdlDir)" am "$(srcDir)/0001-Bytepipe-LVDS-inversion-and-CMOS-swap-support.patch" || exit /B 1
