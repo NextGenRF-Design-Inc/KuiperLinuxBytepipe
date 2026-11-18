@@ -56,7 +56,7 @@ directories:
 # inside the Vivado installation directory.
 boards:
 	@if not exist "$(vivadoDir)/data/boards/board_files" mkdir "$(vivadoDir)/data/boards/board_files"
-	@xcopy /E /I /Y "$(srcDir)/../../boards/bytepipe_3cg_som" "$(vivadoDir)/data/boards/board_files/bytepipe_3cg_som"
+	@xcopy /E /I /Y "$(srcDir)/../boards/bytepipe_3cg_som" "$(vivadoDir)/data/boards/board_files/bytepipe_3cg_som"
 
 ip:
 	@$(MAKE) -C "$(hdlDir)/library/util_pack/util_upack2" xilinx || exit /B 1

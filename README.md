@@ -108,6 +108,20 @@ set "XILINX_ROOT=C:\Xilinx"
 sw\compile-xsa.cmd 3CG
 ```
 
+#### CMOS interface
+
+The scripts above build the LVDS interface. For CMOS, load the Vivado 2023.2 settings and run the HDL Makefile from `workspace/` with `mode=cmos`:
+
+```bash
+source "$XILINX_ROOT/Vivado/2023.2/settings64.sh"
+cd workspace
+make -f ../hdl/Makefile DEV=xczu3cg-sbva484-1-e mode=cmos XSA_NAME=system_top.xsa
+```
+
+On Windows, after `settings64.bat`: `make -f ..\hdl\Makefile.windows DEVICE=xczu3cg MODE=cmos XSA_NAME=system_top.xsa`. Use `xczu3eg` for a 3EG.
+
+The output replaces `workspace/system_top.xsa`, so the BOOT.BIN build then uses the CMOS bitstream. The ADRV9002 driver detects the interface type from the bitstream and loads its CMOS profile; the device tree is the same for both.
+
 ### Compile device tree
 
 [Script](sw/compile-dtb.sh) — builds and installs `system.dtb`.
