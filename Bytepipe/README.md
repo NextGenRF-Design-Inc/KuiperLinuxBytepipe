@@ -1,4 +1,6 @@
-# Kuiper Linux on Bytepipe
+# Kuiper Linux on Bytepipe 3CG / 3EG
+
+For BytepipeX, see [`../BytepipeX/README.md`](../BytepipeX/README.md).
 
 Prepare a Kuiper Linux SD card for Bytepipe 3CG or 3EG, using prebuilt files or building components from source.
 
@@ -10,7 +12,7 @@ Use Linux for SD-card preparation and software builds. HDL builds also support W
 
 ```bash
 git clone https://github.com/NextGenRF-Design-Inc/KuiperLinuxBytepipe.git
-cd KuiperLinuxBytepipe
+cd KuiperLinuxBytepipe/Bytepipe
 bash sw/setup-workspace.sh
 ```
 
