@@ -278,7 +278,7 @@ proc create_root_design { parentCell } {
   set axi_adrv9001 [ create_bd_cell -type ip -vlnv analog.com:user:axi_adrv9001:1.0 axi_adrv9001 ]
   set_property -dict [ list \
    CONFIG.CMOS_LVDS_N {0} \
-   CONFIG.USE_RX_CLK_FOR_TX {1} \
+   CONFIG.USE_RX_CLK_FOR_TX {0} \
  ] $axi_adrv9001
 
   # Create instance: axi_adrv9001_rx1_dma, and set properties
