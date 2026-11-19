@@ -558,7 +558,12 @@
 
 		axi_adrv9002_core_tx1: axi-adrv9002-tx-lpc@84A04000 {
 			compatible = "adi,axi-adrv9002-tx-1.0";
-			reg = <0x84A04000 0x2000>;
+			/*
+			 * The TX1 core sits at 0x2000 in the axi_adrv9001 map. The core ignores
+			 * address bit 15, so 0x84A0A000 reaches it without overlapping the RX
+			 * node, as in ADI's zcu102 device tree. 0x84A04000 is the TX2 core.
+			 */
+			reg = <0x84A0A000 0x2000>;
 			clocks = <&adc0_adrv9002 1>;
 			clock-names = "sampl_clk";
 			dmas = <&tx1_dma 0>;
