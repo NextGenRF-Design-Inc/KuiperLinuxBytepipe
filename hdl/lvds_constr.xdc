@@ -121,3 +121,14 @@ set_property CLOCK_DELAY_GROUP BALANCE_TX_CLOCKS_2 \
   [list [get_nets -of [get_pins i_system_wrapper/system_i/axi_adrv9001/inst/i_if/i_tx_2_phy/i_dac_div_clk_rbuf/O]] \
         [get_nets -of [get_pins i_system_wrapper/system_i/axi_adrv9001/inst/i_if/i_tx_2_phy/i_dac_clk_in_gbuf/O]] \
   ]
+
+# RX1 -> RX2 MSSI reset: rx_1_phy/mssi_sync_edge (rx1_dclk_out) feeds
+# rx_2_phy/ssi_rst_pos (rx2_dclk_out) in one cycle, so both BUFGCE_DIVs clear on
+# the same edge. Both flops are clocked straight from their DCLK input buffers
+# over local routing, and with the +/-0.1 ns source latency above, the
+# on-chip variation on those routes leaves no setup/hold window wherever the
+# placer puts them (-0.169 to -0.271 ns setup in earlier builds). Swept over
+# slices next to the RX DCLK pins (K4, J3): column X46 meets both checks,
+# X47/X48 do not. Fix the pair there.
+set_property LOC SLICE_X46Y90 [get_cells i_system_wrapper/system_i/axi_adrv9001/inst/i_if/i_rx_1_phy/mssi_sync_edge_reg]
+set_property LOC SLICE_X46Y91 [get_cells i_system_wrapper/system_i/axi_adrv9001/inst/i_if/i_rx_2_phy/ssi_rst_pos_reg]
