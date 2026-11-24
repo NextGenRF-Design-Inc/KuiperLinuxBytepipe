@@ -53,6 +53,17 @@ set_property -dict [list CONFIG.CMOS_LVDS_N {1}] [get_bd_cells axi_adrv9001]
 } else {
 set_property -dict [list CONFIG.CMOS_LVDS_N {0}] [get_bd_cells axi_adrv9001]
 }
+
+# Constraints that depend on the TX SSI clock source (CONFIG.USE_RX_CLK_FOR_TX in
+# system.tcl): TX on its own DCLK_IN needs its own clock-buffer constraints; LVDS
+# with TX clocked from RX needs the RX1 reset false path (lvds_rxclk_constr.tcl).
+set use_rx_clk_for_tx [get_property CONFIG.USE_RX_CLK_FOR_TX [get_bd_cells axi_adrv9001]]
+if {$use_rx_clk_for_tx == 0} {
+add_files -fileset constrs_1 -norecurse $srcDir/${mode}_txclk_constr.xdc
+} elseif {$mode eq "lvds"} {
+add_files -fileset constrs_1 -norecurse $srcDir/lvds_rxclk_constr.tcl
+set_property USED_IN_SYNTHESIS false [get_files $srcDir/lvds_rxclk_constr.tcl]
+}
 # Refresh and Save Project
 update_compile_order -fileset sources_1
 regenerate_bd_layout
